@@ -1,0 +1,68 @@
+---
+
+- name: create vpc
+  ec2_vpc:
+    state: present
+    internet_gateway: true
+    cidr_block: 172.23.0.0/16
+    resource_tags:
+      Name: "{{ workshop_name }}"
+      Environment: "{{ workshop_name }}"
+    region: "{{ ec2_region }}"
+  register: vpc
+
+- name: create vpc subnet
+  ec2_vpc_subnet:
+    state: present
+    vpc_id: "{{ vpc.vpc_id }}"
+    region: "{{ ec2_region }}"
+    cidr: 172.23.5.0/24
+    resource_tags:
+      Name: "{{ workshop_name }} subnet"
+  register: subnet
+
+- name: create security groups
+  ec2_group:
+    name: "{{ item.name }}"
+    description: "{{ item.desc }}"
+    rules: "{{ item.rules }}"
+    region: "{{ ec2_region }}"
+    vpc_id: "{{ vpc.vpc_id }}"
+  with_items: "{{ security_groups }}"
+
+- name: allocate jump host instance
+  ec2:
+    region: "{{ ec2_region }}"
+    keypair: "{{ item.keypair }}"
+    group: "{{ item.group }}"
+    vpc_subnet_id: "{{ subnet.subnet.id }}"
+    instance_type: "{{ item.instance_type }}"
+    image: "{{ item.image }}"
+    instance_tags: "{{ item.instance_tags }}"
+    exact_count: "{{ item.exact_count }}"
+    count_tag: "{{ item.count_tag }}"
+    wait: true
+  register: jump_host
+  with_items: "{{ ec2_jump_host_instances }}"
+
+- name: allocate worker instances
+  ec2:
+    region: "{{ ec2_region }}"
+    keypair: "{{ item.keypair }}"
+    group: "{{ item.group }}"
+    vpc_subnet_id: "{{ subnet.subnet.id }}"
+    instance_type: "{{ item.instance_type }}"
+    image: "{{ item.image }}"
+    instance_tags: "{{ item.instance_tags }}"
+    exact_count: "{{ item.exact_count }}"
+    count_tag: "{{ item.count_tag }}"
+    wait: true
+  register: worker_hosts
+  with_items: "{{ ec2_worker_instances }}"
+
+- name: assign public ip to jump host
+  ec2_eip:
+    region: "{{ ec2_region }}"
+    device_id: "{{ jump_host.results[0].tagged_instances[0].id }}"
+    ip: "{{ eip }}"
+

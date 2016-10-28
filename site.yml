@@ -1,0 +1,11 @@
+---
+
+- name: set up compute environment
+  hosts: localhost
+  connection: local
+
+  vars_files:
+    - vars/env.yml
+
+  roles:
+    - allocate
