@@ -4,28 +4,40 @@
   hosts: localhost
   connection: local
   vars_files:
-    - vars/env.yml
+    - vars.yml
   tasks:
     - name: create vpc
       ec2_vpc:
         state: present
         internet_gateway: true
-        cidr_block: 172.23.0.0/16
+        cidr_block: "{{ vpc_cidr_block }}"
         resource_tags:
           Name: "{{ workshop_name }}"
           Environment: "{{ workshop_name }}"
         region: "{{ ec2_region }}"
+        subnets:
+          - cidr: "{{ vpc_cidr_block }}"
+            resource_tags:
+              Name: "{{ workshop_name }} subnet"
+        route_tables:
+          - subnets:
+            - "{{ vpc_cidr_block }}"
+            routes:
+              - dest: 0.0.0.0/0
+                gw: igw
       register: vpc
 
-    - name: create vpc subnet
+    - name: get subnet
       ec2_vpc_subnet:
-        state: present
         vpc_id: "{{ vpc.vpc_id }}"
         region: "{{ ec2_region }}"
-        cidr: 172.23.5.0/24
+        cidr: "{{ vpc_cidr_block }}"
         resource_tags:
           Name: "{{ workshop_name }} subnet"
+        state: present
       register: subnet
+
+    - debug: var=subnet
 
     - name: create security groups
       ec2_group:
@@ -34,12 +46,27 @@
         rules: "{{ item.rules }}"
         region: "{{ ec2_region }}"
         vpc_id: "{{ vpc.vpc_id }}"
+        state: present
       with_items: "{{ security_groups }}"
+
+    - name: create keypair
+      ec2_key:
+        name: "{{ workshop_name }}"
+        region: "{{ ec2_region }}"
+        state: present
+      register: key
+
+    - name: save keypair to localhost
+      copy:
+        content: "{{ key.key.private_key }}"
+        dest: ./workshopkey-private.pem
+        mode: 0600
+      when: key.changed
 
     - name: allocate jump host instance
       ec2:
         region: "{{ ec2_region }}"
-        keypair: "{{ item.keypair }}"
+        keypair: "{{ key.key.name }}"
         group: "{{ item.group }}"
         vpc_subnet_id: "{{ subnet.subnet.id }}"
         instance_type: "{{ item.instance_type }}"
@@ -51,10 +78,10 @@
       register: jump_host
       with_items: "{{ ec2_jump_host_instances }}"
 
-    - name: allocate worker instances
+    - name: allocate compute instances
       ec2:
         region: "{{ ec2_region }}"
-        keypair: "{{ item.keypair }}"
+        keypair: "{{ key.key.name }}"
         group: "{{ item.group }}"
         vpc_subnet_id: "{{ subnet.subnet.id }}"
         instance_type: "{{ item.instance_type }}"
@@ -63,8 +90,7 @@
         exact_count: "{{ item.exact_count }}"
         count_tag: "{{ item.count_tag }}"
         wait: true
-      register: worker_hosts
-      with_items: "{{ ec2_worker_instances }}"
+      with_items: "{{ ec2_compute_instances }}"
 
     - name: assign public ip to jump host
       ec2_eip:

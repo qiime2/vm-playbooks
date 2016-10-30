@@ -1,14 +1,17 @@
 ---
 
 ec2_region: us-west-2
-instances_keypair: discourse (10-26-2016)
 # image_id: ami-edd7738d
 image_id: ami-a9d276c9
 jump_host_name: workshop_jump_host
+jump_host_type: t2.nano
 compute_host_name: workshop_compute_host
+compute_host_type: t2.nano
+compute_host_count: 1
 group_name: ssh-workshops
 workshop_name: "PHX Fall 2016"
 eip: 35.161.218.38
+vpc_cidr_block: 172.23.0.0/16
 
 security_groups:
   - name: "{{ group_name }}"
@@ -18,11 +21,14 @@ security_groups:
         from_port: 22
         to_port: 22
         cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0
 
 ec2_jump_host_instances:
-  - instance_type: t2.nano
+  - instance_type: "{{ jump_host_type }}"
     image: "{{ image_id }}"
-    keypair: "{{ instances_keypair }}"
     group: ["{{ group_name }}"]
     instance_tags:
       Name: "{{ jump_host_name }}"
@@ -30,13 +36,12 @@ ec2_jump_host_instances:
     count_tag:
       Name: "{{ jump_host_name }}"
 
-ec2_worker_instances:
-  - instance_type: t2.nano
+ec2_compute_instances:
+  - instance_type: "{{ compute_host_type }}"
     image: "{{ image_id }}"
-    keypair: "{{ instances_keypair }}"
     group: ["{{ group_name }}"]
     instance_tags:
       Name: "{{ compute_host_name }}"
-    exact_count: 1
+    exact_count: "{{ compute_host_count }}"
     count_tag:
       Name: "{{ compute_host_name }}"
