@@ -2,3 +2,5 @@ venv
 *.retry
 .DS_Store
 *.pem
+*.csv
+*.json

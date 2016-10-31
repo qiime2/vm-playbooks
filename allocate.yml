@@ -118,6 +118,17 @@
         - "{{ compute_hosts.results }}"
         - tagged_instances
 
+    - name: check if users files already exist
+      stat:
+        path: roster.json
+      register: roster
+
+    - name: generate account info
+      command: "python {{ playbook_dir }}/generate_accts.py '{{ ec2_compute_instances | to_json }}'"
+      when: not roster.stat.exists
+
+    - pause: seconds=30
+
 - hosts: all_hosts
   remote_user: ubuntu
   gather_facts: False
@@ -128,15 +139,39 @@
 - hosts: all_hosts
   remote_user: ubuntu
   become: True
+  vars_files:
+    - vars.yml
+  vars:
+    users: "{{ lookup('file', 'roster.json') | from_json }}"
   tasks:
-    - name: set up ssh
+    - debug: var=users
+    - name: update all packages to the latest version
+      apt:
+        upgrade: dist
+    - name: create groups
+      group:
+        name: "worker{{ (item | int) - 1 }}"
+        state: present
+      with_sequence: count="{{ compute_host_count }}"
+    - name: create user accounts
+      user:
+        name: "{{ item.name }}"
+        password: "{{ item.hash }}"
+        group: "{{ item.group }}"
+      with_items: "{{ users }}"
+    - name: set up ssh (general)
       lineinfile:
-        dest: /etc/ssh/ssh_config
+        dest: /etc/ssh/sshd_config
         regexp: "{{ item.regexp }}"
         line: "{{ item.line }}"
       with_items:
-        - { regexp: '^.*PasswordAuthentication.*$', line: 'PasswordAuthentication yes' }
+        - { regexp: '^PasswordAuthentication.*$', line: 'PasswordAuthentication yes' }
         - { regexp: '^.*Port.*$', line: 'Port 22' }
+      notify:
+        - restart ssh
+  handlers:
+    - name: restart ssh
+      service: name=ssh state=restarted
 
 - hosts: jump_hosts
   remote_user: ubuntu
@@ -148,3 +183,14 @@
         state: latest
       with_items:
         - nginx
+      # - name: configure ssh for jumping
+      # - blockinfile:
+      # -   dest: /etc/ssh/sshd_config
+      # -   block: |
+      # -     Match Group worker0
+      # -     ProxyJump 35.161.244.42
+      # - notify:
+      # -   - restart ssh
+  handlers:
+    - name: restart ssh
+      service: name=ssh state=restarted

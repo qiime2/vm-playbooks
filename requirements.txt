@@ -8,6 +8,7 @@ ipaddress==1.0.17
 Jinja2==2.8
 MarkupSafe==0.23
 paramiko==2.0.2
+passlib==1.6.5
 pyasn1==0.1.9
 pycparser==2.16
 pycrypto==2.6.1
