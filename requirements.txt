@@ -12,4 +12,5 @@ pyasn1==0.1.9
 pycparser==2.16
 pycrypto==2.6.1
 PyYAML==3.12
+random_name==0.1.0
 six==1.10.0
