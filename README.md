@@ -15,6 +15,9 @@ $ export AWS_ACCESS_KEY_ID='AK123'
 $ export AWS_SECRET_ACCESS_KEY='abc123'
 ```
 
+Since we don't use R53 for our DNS yet, the script assumes that you have
+allocated an EIP, and updated the value in `vars.yml` accordingly.
+
 ### Allocate infrastructure
 ```bash
 $ ansible-playbook -i inventory allocate.yml

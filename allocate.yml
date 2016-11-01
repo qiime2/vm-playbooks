@@ -94,6 +94,17 @@
         name: "{{ eip }}"
         groups: jump_hosts, all_hosts
 
+    - name: allocate ebs
+      ec2_vol:
+        region: "{{ ec2_region }}"
+        name: "{{ workshop_name }}"
+        instance: "{{ jump_hosts.instances[0].id }}"
+        volume_size: 8
+        volume_type: gp2
+        device_name: /dev/xvdb
+        state: present
+      register: ebs_vol
+
     - name: allocate compute instances
       ec2:
         region: "{{ ec2_region }}"
@@ -134,7 +145,7 @@
       command: "python {{ playbook_dir }}/generate_accts.py '{{ ec2_compute_instances | to_json }}'"
       when: not roster.stat.exists
 
-    - pause: seconds=30
+    - pause: seconds=60
 
 - hosts: all_hosts
   remote_user: ubuntu
@@ -148,24 +159,18 @@
   become: True
   vars_files:
     - vars.yml
-  vars:
-    users: "{{ lookup('file', 'roster.json') | from_json }}"
   tasks:
-    - debug: var=users
+
     - name: update all packages to the latest version
       apt:
         upgrade: dist
+
     - name: create groups
       group:
-        name: "worker{{ (item.0 | int) - 1 }}"
+        name: "{{ hostvars[item]['grp'] }}"
         state: present
-      with_indexed_items: "{{ compute_host_count }}"
-    - name: create user accounts
-      user:
-        name: "{{ item.name }}"
-        password: "{{ item.hash }}"
-        group: "{{ item.group }}"
-      with_items: "{{ users }}"
+      with_items: "{{ groups['compute_hosts'] }}"
+
     - name: set up ssh (general)
       lineinfile:
         dest: /etc/ssh/sshd_config
@@ -174,15 +179,19 @@
       with_items:
         - { regexp: '^PasswordAuthentication.*$', line: 'PasswordAuthentication yes' }
         - { regexp: '^.*Port.*$', line: 'Port 22' }
-      notify:
-        - restart ssh
-  handlers:
+
     - name: restart ssh
-      service: name=ssh state=restarted
+      service:
+        name: ssh
+        state: restarted
 
 - hosts: jump_hosts
   remote_user: ubuntu
   become: True
+  vars_files:
+    - vars.yml
+  vars:
+    users: "{{ lookup('file', 'roster.json') | from_json }}"
   tasks:
     - name: set up prereqs
       apt:
@@ -190,15 +199,100 @@
         state: latest
       with_items:
         - nginx
+        - nfs-common
+        - nfs-kernel-server
+
+    - name: create mount point
+      file:
+        path: /mnt/home
+        state: directory
+        mode: 777
+        owner: ubuntu
+        group: ubuntu
+
+    - name: prep shared drive filesystem
+      filesystem:
+        fstype: ext4
+        dev: /dev/xvdb
+
+    - name: mount ebs
+      mount:
+        name: /mnt/home
+        src: /dev/xvdb
+        fstype: auto
+        state: mounted
+
+    - name: set up nfs server
+      lineinfile:
+        dest: /etc/exports
+        insertafter: EOF
+        line: "/mnt/home {{ vpc_cidr_block }}(rw,nohide,fsid=0,insecure,no_subtree_check,async)"
+
+    - name: create user accounts
+      user:
+        name: "{{ item.name }}"
+        password: "{{ item.hash }}"
+        group: "{{ item.group }}"
+        uid: "{{ item.uid }}"
+        shell: /bin/bash
+        createhome: True
+        home: "/mnt/home/{{ item.name }}"
+      with_items: "{{ users }}"
+
     - name: configure ssh for jumping
       blockinfile:
         dest: /etc/ssh/sshd_config
+        marker: "# {mark} ANSIBLE MANAGED BLOCK - {{ item }}"
         block: |
           Match Group {{ hostvars[item]['grp'] }}
               ForceCommand ssh {{ item }}
       with_items: "{{ groups['compute_hosts'] }}"
-      notify:
-        - restart ssh
-  handlers:
-    - name: restart ssh
-      service: name=ssh state=restarted
+
+    - name: restart ssh and nfs
+      service:
+        name: "{{ item }}"
+        state: restarted
+      with_items:
+        - ssh
+        - nfs-kernel-server
+
+- hosts: compute_hosts
+  remote_user: ubuntu
+  become: True
+  vars_files:
+    - vars.yml
+  vars:
+    users: "{{ lookup('file', 'roster.json') | from_json }}"
+  tasks:
+    - name: set up prereqs
+      apt:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - nfs-common
+
+    - name: create mount point
+      file:
+        path: /mnt/home
+        state: directory
+        mode: 777
+        owner: ubuntu
+        group: ubuntu
+
+    - name: mount nfs share (homedirs)
+      mount:
+        name: /mnt/home
+        src: "{{ hostvars.localhost.jump_hosts.instances[0].private_ip_address }}:/mnt/home"
+        fstype: nfs
+        state: mounted
+
+    - name: create user accounts
+      user:
+        name: "{{ item.name }}"
+        password: "{{ item.hash }}"
+        group: "{{ item.group }}"
+        uid: "{{ item.uid }}"
+        shell: /bin/bash
+        createhome: False
+        home: "/mnt/home/{{ item.name }}"
+      with_items: "{{ users }}"

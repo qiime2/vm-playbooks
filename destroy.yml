@@ -21,6 +21,13 @@
         wait: true
       with_items: "{{ facts.instances }}"
 
+    - name: destroy ebs
+      ec2_vol:
+        region: "{{ ec2_region }}"
+        name: "{{ workshop_name }}"
+        instance: "{{ jump_hosts.instances[0].id }}"
+        state: absent
+
     - name: destroy keypair
       ec2_key:
         name: "{{ workshop_name }}"

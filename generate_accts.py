@@ -68,7 +68,6 @@ def generate_password(size=6):
 if __name__=='__main__':
     host_data = json.loads(sys.argv[1])
     accts_per_host = 8
-    print(host_data)
     count = int(host_data[0]['exact_count'])
     names = generate_names(count * accts_per_host)
     users = []
@@ -79,9 +78,10 @@ if __name__=='__main__':
             'pass': password,
             'hash': sha512_crypt.encrypt(password),
             'group': 'worker%d' % int((i / accts_per_host)),
+            'uid': i + 2000
         }
         users.append(record)
-    keys = ['name', 'pass', 'hash', 'group']
+    keys = ['name', 'pass', 'hash', 'group', 'uid']
     with open('roster.csv', 'w') as fh:
         w = csv.DictWriter(fh, keys)
         w.writeheader()

@@ -27,6 +27,22 @@ security_groups:
         from_port: 80
         to_port: 80
         cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 111
+        to_port: 111
+        cidr_ip: 0.0.0.0/0
+      - proto: udp
+        from_port: 111
+        to_port: 111
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 2049
+        to_port: 2049
+        cidr_ip: 0.0.0.0/0
+      - proto: udp
+        from_port: 32806
+        to_port: 32806
+        cidr_ip: 0.0.0.0/0
 
 ec2_jump_host_instances:
   - instance_type: "{{ jump_host_type }}"
