@@ -3,6 +3,7 @@
 ec2_region: us-west-2
 # image_id: ami-edd7738d
 image_id: ami-a9d276c9
+# image_id: ami-cbd276ab
 jump_host_name: workshop_jump_host
 jump_host_type: t2.nano
 compute_host_name: workshop_compute_host

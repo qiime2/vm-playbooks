@@ -113,10 +113,17 @@
     - name: add compute hosts to inventory
       add_host:
         name: "{{ item.1.public_ip }}"
-        groups: all_hosts
+        groups: all_hosts, compute_hosts
       with_subelements:
         - "{{ compute_hosts.results }}"
         - tagged_instances
+
+    - name: add vars to dynamic groups
+      add_host:
+        name: "{{ item.1 }}"
+        groups: compute_hosts
+        grp: "worker{{ item.0 }}"
+      with_indexed_items: "{{ groups['compute_hosts'] }}"
 
     - name: check if users files already exist
       stat:
@@ -150,9 +157,9 @@
         upgrade: dist
     - name: create groups
       group:
-        name: "worker{{ (item | int) - 1 }}"
+        name: "worker{{ (item.0 | int) - 1 }}"
         state: present
-      with_sequence: count="{{ compute_host_count }}"
+      with_indexed_items: "{{ compute_host_count }}"
     - name: create user accounts
       user:
         name: "{{ item.name }}"
@@ -183,14 +190,15 @@
         state: latest
       with_items:
         - nginx
-      # - name: configure ssh for jumping
-      # - blockinfile:
-      # -   dest: /etc/ssh/sshd_config
-      # -   block: |
-      # -     Match Group worker0
-      # -     ProxyJump 35.161.244.42
-      # - notify:
-      # -   - restart ssh
+    - name: configure ssh for jumping
+      blockinfile:
+        dest: /etc/ssh/sshd_config
+        block: |
+          Match Group {{ hostvars[item]['grp'] }}
+              ForceCommand ssh {{ item }}
+      with_items: "{{ groups['compute_hosts'] }}"
+      notify:
+        - restart ssh
   handlers:
     - name: restart ssh
       service: name=ssh state=restarted
