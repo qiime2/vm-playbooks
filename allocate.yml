@@ -142,7 +142,7 @@
       register: roster
 
     - name: generate account info
-      command: "python {{ playbook_dir }}/generate_accts.py '{{ ec2_compute_instances | to_json }}'"
+      command: "python {{ playbook_dir }}/generate_accts.py '{{ ec2_compute_instances | to_json }}' {{ accts_per_host }}"
       when: not roster.stat.exists
 
     - pause: seconds=60
@@ -160,7 +160,6 @@
   vars_files:
     - vars.yml
   tasks:
-
     - name: update all packages to the latest version
       apt:
         upgrade: dist
@@ -202,6 +201,11 @@
         - nfs-common
         - nfs-kernel-server
 
+    - name: set up nginx
+      copy:
+        src: nginx.conf
+        dest: /etc/nginx/sites-available/default
+
     - name: create mount point
       file:
         path: /mnt/home
@@ -236,14 +240,17 @@
         - export PATH="/mnt/home/miniconda3/bin:$PATH"
         - source tab-qiime
 
-    - name: create matplotlib config dirs
+    - name: create matplotlib config dirs and ssh dir
       file:
         path: "{{ item.path }}"
         state: "{{ item.state }}"
+        mode: "{{ item.mode }}"
       with_items:
-        - { path: '/etc/skel/.config', state: 'directory' }
-        - { path: '/etc/skel/.config/matplotlib', state: 'directory' }
-        - { path: '/etc/skel/.config/matplotlib/matplotlibrc', state: 'touch' }
+        - { path: '/etc/skel/.config', state: 'directory', mode: '0644'}
+        - { path: '/etc/skel/.config/matplotlib', state: 'directory', mode: '0644' }
+        - { path: '/etc/skel/.config/matplotlib/matplotlibrc', state: 'touch', mode: '0644' }
+        - { path: '/etc/skel/.ssh', state: 'directory', mode: '0644' }
+        - { path: '/etc/skel/www', state: 'directory', mode: '0755' }
 
     - name: set up /etc/skel/.config/matplotlib/matplotlibrc
       lineinfile:
@@ -280,12 +287,12 @@
     - name: download miniconda
       get_url:
         url: https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-        dest: miniconda.sh
+        dest: /usr/local/src/miniconda.sh
         mode: u+rx
       when: not miniconda.stat.exists
 
     - name: install miniconda
-      command: "./miniconda.sh -b -p /mnt/home/miniconda3"
+      command: "/usr/local/src/miniconda.sh -b -p /mnt/home/miniconda3"
       when: not miniconda.stat.exists
 
     - name: install matplotlib
@@ -318,13 +325,14 @@
       environment:
         PATH: /mnt/home/miniconda3/bin:$PATH
 
-    - name: restart ssh and nfs
+    - name: restart services
       service:
         name: "{{ item }}"
         state: restarted
       with_items:
         - ssh
         - nfs-kernel-server
+        - nginx
 
 - hosts: compute_hosts
   remote_user: ubuntu

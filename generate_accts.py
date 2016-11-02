@@ -10,10 +10,9 @@ from passlib.hash import sha512_crypt
 
 
 ADJECTIVES = ['bluesy', 'blurry', 'breezy', 'cloudy', 'cozy', 'cranky',
-              'foggy', 'grumpy', 'hasty', 'jumpy', 'lovely', 'messy',
-              'pretty', 'queasy', 'scaly', 'shaky', 'silly', 'sleepy',
-              'snazzy', 'squeaky', 'stealthy', 'thirsty', 'wheezy', 'woozy',
-              'zippy']
+              'foggy', 'grumpy', 'hasty', 'jumpy', 'lovely', 'messy', 'pretty',
+              'queasy', 'scaly', 'shaky', 'silly', 'sleepy', 'snazzy',
+              'squeaky', 'stealthy', 'thirsty', 'wheezy', 'woozy', 'zippy']
 
 ANIMALS = ['akita', 'albatross', 'alligator', 'angelfish', 'ant', 'anteater',
            'antelope', 'armadillo', 'axolotl', 'baboon', 'badger', 'bandicoot',
@@ -65,24 +64,32 @@ def generate_password(size=6):
 
 if __name__=='__main__':
     host_data = json.loads(sys.argv[1])
-    accts_per_host = 8
+    accts_per_host = int(sys.argv[2])
     count = int(host_data[0]['exact_count'])
     names = generate_names(count * accts_per_host)
-    users = []
+    csv_users = []
+    json_users = []
     for i, name in enumerate(names):
         password = generate_password()
-        record = {
+        password_hash = sha512_crypt.encrypt(password)
+        group = 'worker%d' % int((i / accts_per_host))
+        uid = i + 2000
+        csv_record = {
             'name': name,
-            'pass': password,
-            'hash': sha512_crypt.encrypt(password),
-            'group': 'worker%d' % int((i / accts_per_host)),
-            'uid': i + 2000
+            'password': password,
+            'group': group,
         }
-        users.append(record)
-    keys = ['name', 'pass', 'hash', 'group', 'uid']
+        csv_users.append(csv_record)
+        json_record = {
+            'name': name,
+            'hash': password_hash,
+            'group': group,
+            'uid': uid,
+        }
+        json_users.append(json_record)
     with open('roster.csv', 'w') as fh:
-        w = csv.DictWriter(fh, keys)
+        w = csv.DictWriter(fh, ['name', 'password', 'group'])
         w.writeheader()
-        w.writerows(users)
+        w.writerows(csv_users)
     with open('roster.json', 'w') as fh:
-        json.dump(users, fh)
+        json.dump(json_users, fh)

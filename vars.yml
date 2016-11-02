@@ -12,6 +12,7 @@ workshop_name: "PHX Fall 2016"
 eip: 35.161.218.38
 vpc_cidr_block: 172.23.0.0/16
 workshop_key_fn: workshopkey-private.pem
+accts_per_host: 7
 
 security_groups:
   - name: "{{ group_name }}"
