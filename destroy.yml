@@ -21,12 +21,20 @@
         wait: true
       with_items: "{{ facts.instances }}"
 
+    # TODO: pull out into own
+    - name: gather ebs facts
+      ec2_vol_facts:
+        region: "{{ ec2_region }}"
+        filters:
+          "tag:Name": "{{ workshop_name }}"
+      register: ebs_facts
+
     - name: destroy ebs
       ec2_vol:
         region: "{{ ec2_region }}"
-        name: "{{ workshop_name }}"
-        instance: "{{ jump_hosts.instances[0].id }}"
+        id: "{{ item.id }}"
         state: absent
+      with_items: "{{ ebs_facts.volumes }}"
 
     - name: destroy keypair
       ec2_key:
@@ -51,8 +59,6 @@
         state: absent
       with_items: "{{ facts.instances }}"
       register: subnets
-
-    - debug: var=subnets
 
     - name: destroy vpc route table
       ec2_vpc_route_table:

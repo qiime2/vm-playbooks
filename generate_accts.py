@@ -9,25 +9,24 @@ import sys
 from passlib.hash import sha512_crypt
 
 
-ADJECTIVES = ['baggy', 'bluesy', 'blurry', 'breezy', 'cloudy', 'cozy',
-              'crabby', 'cranky', 'foggy', 'freaky', 'fuzzy', 'grumpy',
-              'hasty', 'jumpy', 'lovely', 'messy', 'pokey', 'pretty',
-              'queasy', 'scaly', 'shaggy', 'shaky', 'silly', 'sleepy',
-              'snazzy', 'squeaky', 'squirrely', 'stealthy', 'thirsty',
-              'wheezy', 'wiggly', 'woozy', 'zippy']
+ADJECTIVES = ['bluesy', 'blurry', 'breezy', 'cloudy', 'cozy', 'cranky',
+              'foggy', 'grumpy', 'hasty', 'jumpy', 'lovely', 'messy',
+              'pretty', 'queasy', 'scaly', 'shaky', 'silly', 'sleepy',
+              'snazzy', 'squeaky', 'stealthy', 'thirsty', 'wheezy', 'woozy',
+              'zippy']
 
 ANIMALS = ['akita', 'albatross', 'alligator', 'angelfish', 'ant', 'anteater',
            'antelope', 'armadillo', 'axolotl', 'baboon', 'badger', 'bandicoot',
-           'barnacle', 'barracuda', 'bat', 'beagle', 'bear', 'beaver', 'bee',
-           'beetle', 'bird', 'bison', 'bloodhound', 'boar', 'bobcat', 'bonobo',
-           'buffalo', 'bulldog', 'bullfrog', 'butterfly', 'buzzard', 'camel',
-           'capybara', 'cat', 'caterpillar', 'catfish', 'cattle', 'centipede',
-           'chameleon', 'cheetah', 'chicken', 'chinchilla', 'chipmunk', 'clam',
-           'cockroach', 'cougar', 'cow', 'coyote', 'crab', 'crocodile', 'deer',
-           'dodo', 'dog', 'dolphin', 'donkey', 'dragon', 'duck', 'eagle',
-           'echidna', 'eel', 'elephant', 'emu', 'ferret', 'fish', 'flamingo',
-           'fox', 'frog', 'gecko', 'gerbil', 'giraffe', 'goat', 'goose',
-           'gorilla', 'grasshopper', 'guppy', 'hamster', 'hedgehog', 'horse',
+           'barracuda', 'bat', 'beagle', 'bear', 'bee', 'beetle', 'bird',
+           'bison', 'bloodhound', 'boar', 'bobcat', 'bonobo', 'buffalo',
+           'bulldog', 'bullfrog', 'butterfly', 'buzzard', 'camel', 'capybara',
+           'cat', 'caterpillar', 'catfish', 'cattle', 'centipede', 'chameleon',
+           'cheetah', 'chicken', 'chinchilla', 'chipmunk', 'cockroach',
+           'cougar', 'cow', 'coyote', 'crab', 'crocodile', 'deer', 'dodo',
+           'dog', 'dolphin', 'donkey', 'dragon', 'duck', 'eagle', 'echidna',
+           'eel', 'elephant', 'emu', 'ferret', 'fish', 'flamingo', 'fox',
+           'frog', 'gecko', 'gerbil', 'giraffe', 'goat', 'goose', 'gorilla',
+           'grasshopper', 'guppy', 'hamster', 'hedgehog', 'horse',
            'hummingbird', 'hyena', 'iguana', 'jaguar', 'jellyfish', 'kangaroo',
            'koala', 'lemming', 'lemur', 'leopard', 'lion', 'lizard', 'llama',
            'lobster', 'lynx', 'magpie', 'mammoth', 'meerkat', 'mole',
@@ -35,11 +34,10 @@ ANIMALS = ['akita', 'albatross', 'alligator', 'angelfish', 'ant', 'anteater',
            'ostrich', 'otter', 'owl', 'oyster', 'panda', 'penguin', 'pig',
            'quail', 'quokka', 'quoll', 'rabbit', 'raccoon', 'rat', 'reindeer',
            'salamander', 'scorpion', 'seahorse', 'seal', 'shark', 'sheep',
-           'shrew', 'shrimp', 'skunk', 'sloth', 'slug', 'snail', 'snake',
-           'spider', 'squid', 'squirrel', 'stoat', 'swan', 'tarantula',
-           'termite', 'tiger', 'toad', 'turkey', 'turtle', 'wallaby', 'walrus',
-           'warthog', 'wasp', 'weasel', 'whale', 'wolf', 'wombat', 'worm',
-           'yak', 'zebra']
+           'shrew', 'shrimp', 'skunk', 'sloth', 'slug', 'snail', 'spider',
+           'squid', 'squirrel', 'stoat', 'swan', 'tarantula', 'termite',
+           'tiger', 'toad', 'turkey', 'turtle', 'wallaby', 'walrus', 'warthog',
+           'wasp', 'weasel', 'whale', 'wolf', 'wombat', 'yak', 'zebra']
 
 CHARS = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789'
 
