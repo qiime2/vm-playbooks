@@ -179,10 +179,18 @@
         - { regexp: '^PasswordAuthentication.*$', line: 'PasswordAuthentication yes' }
         - { regexp: '^.*Port.*$', line: 'Port 22' }
 
-    - name: restart ssh
-      service:
-        name: ssh
-        state: restarted
+    - name: restart machine
+      command: "sleep 1 && shutdown -r now 'Ansible updates triggered' && sleep 1"
+      async: 1
+      poll: 0
+      ignore_errors: True
+
+    - name: waiting for server to come back
+      local_action: wait_for host={{ inventory_hostname }} port=22
+                    state=started delay=20 connect_timeout=200
+      become: False
+      become_method: sudo
+      delegate_to: localhost
 
 - hosts: jump_hosts
   remote_user: ubuntu
@@ -214,6 +222,8 @@
 
     - name: set up letsencrypt
       command: "letsencrypt certonly --agree-tos --email {{ email }} -n -a webroot --webroot-path=/var/www/html -d {{ domain }}"
+      args:
+        creates: /etc/letsencrypt
 
     - name: update nginx
       replace:
@@ -377,6 +387,12 @@
         fstype: nfs
         state: mounted
 
+    - name: update fstab
+      lineinfile:
+        dest: /etc/fstab
+        insertafter: EOF
+        line: "{{ hostvars.localhost.jump_hosts.instances[0].private_ip_address }}:/ /mnt/home nfs auto 0 0"
+
     - name: create user accounts
       user:
         name: "{{ item.name }}"
@@ -388,3 +404,23 @@
         home: "/mnt/home/{{ item.name }}"
       with_items: "{{ users }}"
 
+    - name: shared data dir
+      file:
+        path: "/mnt/home/{{ item }}"
+        state: directory
+        mode: 0777
+      with_items:
+        - shared
+        - shared/qiime2-moving-pictures-tutorial
+        - shared/qiime2-moving-pictures-tutorial/raw-sequences
+
+    - name: download data
+      get_url:
+        url: "{{ item.url }}"
+        dest: "/mnt/home/shared/qiime2-moving-pictures-tutorial/{{ item.dest }}"
+        mode: 0777
+        force: False
+      with_items:
+        - { url: "https://docs.google.com/spreadsheets/d/1_3ZbqCtAYx-9BJYHoWlICkVJ4W_QGMfJRPLedt_0hws/export?gid=0&format=tsv", dest: "sample-metadata.tsv" }
+        - { url: "https://data.qiime2.org/2.0.6/tutorials/moving-pictures/raw-sequences/barcodes.fastq.gz", dest: "raw-sequences/barcodes.fastq.gz" }
+        - { url: "https://data.qiime2.org/2.0.6/tutorials/moving-pictures/raw-sequences/sequences.fastq.gz", dest: "raw-sequences/sequences.fastq.gz" }

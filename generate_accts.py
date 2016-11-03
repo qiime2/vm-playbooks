@@ -9,10 +9,10 @@ import sys
 from passlib.hash import sha512_crypt
 
 
-ADJECTIVES = ['bluesy', 'blurry', 'breezy', 'cloudy', 'cozy', 'cranky',
-              'foggy', 'grumpy', 'hasty', 'jumpy', 'lovely', 'messy', 'pretty',
-              'queasy', 'scaly', 'shaky', 'silly', 'sleepy', 'snazzy',
-              'squeaky', 'stealthy', 'thirsty', 'wheezy', 'woozy', 'zippy']
+ADJECTIVES = ['bluesy', 'blurry', 'breezy', 'cozy', 'cranky', 'foggy',
+              'grumpy', 'hasty', 'jumpy', 'lovely', 'messy', 'queasy', 'scaly',
+              'shaky', 'silly', 'sleepy', 'snazzy', 'squeaky', 'stealthy',
+              'thirsty', 'wheezy', 'woozy', 'zippy']
 
 ANIMALS = ['akita', 'albatross', 'alligator', 'angelfish', 'ant', 'anteater',
            'antelope', 'armadillo', 'axolotl', 'baboon', 'badger', 'bandicoot',
@@ -30,8 +30,8 @@ ANIMALS = ['akita', 'albatross', 'alligator', 'angelfish', 'ant', 'anteater',
            'koala', 'lemming', 'lemur', 'leopard', 'lion', 'lizard', 'llama',
            'lobster', 'lynx', 'magpie', 'mammoth', 'meerkat', 'mole',
            'mongoose', 'monkey', 'moose', 'mouse', 'newt', 'ocelot', 'octopus',
-           'ostrich', 'otter', 'owl', 'oyster', 'panda', 'penguin', 'pig',
-           'quail', 'quokka', 'quoll', 'rabbit', 'raccoon', 'rat', 'reindeer',
+           'ostrich', 'otter', 'owl', 'panda', 'penguin', 'pig', 'quail',
+           'quokka', 'quoll', 'rabbit', 'raccoon', 'rat', 'reindeer',
            'salamander', 'scorpion', 'seahorse', 'seal', 'shark', 'sheep',
            'shrew', 'shrimp', 'skunk', 'sloth', 'slug', 'snail', 'spider',
            'squid', 'squirrel', 'stoat', 'swan', 'tarantula', 'termite',
