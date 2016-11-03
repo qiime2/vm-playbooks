@@ -2,19 +2,22 @@
 
 ec2_region: us-west-2
 image_id: ami-a9d276c9
-jump_host_name: workshop_jump_host
 jump_host_type: t2.nano
-compute_host_name: workshop_compute_host
 compute_host_type: t2.nano
 compute_host_count: 1
+accts_per_host: 7
+volume_size: 8
+
+workshop_name: "{{ lookup('env', 'QIIME_WORKSHOP_NAME') }}"
+eip: "{{ lookup('env', 'QIIME_EIP') }}"
+domain: "{{ lookup('env', 'QIIME_SSL_DOMAIN') }}"
+email: "{{ lookup('env', 'QIIME_SSL_EMAIL') }}"
+
+jump_host_name: workshop_jump_host
+compute_host_name: workshop_compute_host
 group_name: ssh-workshops
-workshop_name: "PHX Fall 2016"
-eip: 35.161.218.38
 vpc_cidr_block: 172.23.0.0/16
 workshop_key_fn: workshopkey-private.pem
-accts_per_host: 7
-domain: bact.workshops.qiime2.org
-email: matthewrdillon@gmail.com
 
 security_groups:
   - name: "{{ group_name }}"

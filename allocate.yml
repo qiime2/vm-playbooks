@@ -73,6 +73,12 @@
         exact_count: "{{ item.exact_count }}"
         count_tag: "{{ item.count_tag }}"
         wait: True
+        volumes:
+          device_name: /dev/sda1
+          delete_on_termination: False
+          encrypted: False
+          volume_type: gp2
+          volume_size: "{{ volume_size }}"
       with_items: "{{ ec2_jump_host_instances }}"
 
     - name: get jump host info
@@ -99,7 +105,7 @@
         region: "{{ ec2_region }}"
         name: "{{ workshop_name }}"
         instance: "{{ jump_hosts.instances[0].id }}"
-        volume_size: 8
+        volume_size: "{{ volume_size }}"
         volume_type: gp2
         device_name: /dev/xvdb
         state: present
@@ -117,6 +123,12 @@
         exact_count: "{{ item.exact_count }}"
         count_tag: "{{ item.count_tag }}"
         assign_public_ip: True
+        volumes:
+          device_name: /dev/sda1
+          delete_on_termination: False
+          encrypted: False
+          volume_type: gp2
+          volume_size: "{{ volume_size }}"
         wait: True
       register: compute_hosts
       with_items: "{{ ec2_compute_instances }}"
