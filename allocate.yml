@@ -197,14 +197,35 @@
         name: "{{ item }}"
         state: latest
       with_items:
+        - letsencrypt
         - nginx
         - nfs-common
         - nfs-kernel-server
 
     - name: set up nginx
-      copy:
+      template:
         src: nginx.conf
         dest: /etc/nginx/sites-available/default
+
+    - name: restart services
+      service:
+        name: nginx
+        state: restarted
+
+    - name: set up letsencrypt
+      command: "letsencrypt certonly --agree-tos --email {{ email }} -n -a webroot --webroot-path=/var/www/html -d {{ domain }}"
+
+    - name: update nginx
+      replace:
+        dest: /etc/nginx/sites-available/default
+        regexp: "#"
+        replace: ""
+
+    - name: update nginx (part 2)
+      lineinfile:
+        dest: /etc/nginx/sites-available/default
+        regexp: "listen 80 default_server;"
+        line: ""
 
     - name: create mount point
       file:
@@ -244,13 +265,11 @@
       file:
         path: "{{ item.path }}"
         state: "{{ item.state }}"
-        mode: "{{ item.mode }}"
       with_items:
-        - { path: '/etc/skel/.config', state: 'directory', mode: '0644'}
-        - { path: '/etc/skel/.config/matplotlib', state: 'directory', mode: '0644' }
-        - { path: '/etc/skel/.config/matplotlib/matplotlibrc', state: 'touch', mode: '0644' }
-        - { path: '/etc/skel/.ssh', state: 'directory', mode: '0644' }
-        - { path: '/etc/skel/www', state: 'directory', mode: '0755' }
+        - { path: '/etc/skel/.config', state: 'directory'}
+        - { path: '/etc/skel/.config/matplotlib', state: 'directory'}
+        - { path: '/etc/skel/.config/matplotlib/matplotlibrc', state: 'touch' }
+        - { path: '/etc/skel/workshop', state: 'directory' }
 
     - name: set up /etc/skel/.config/matplotlib/matplotlibrc
       lineinfile:
@@ -269,6 +288,18 @@
         createhome: True
         home: "/mnt/home/{{ item.name }}"
       with_items: "{{ users }}"
+
+    - name: create admin accounts
+      user:
+        name: "{{ item }}"
+        password: "$6$rounds=656000$ycPDEjJbFznV6P00$Vp1EqUejMU/GVaLgO04Qv6XuZ5M3p3tPakCrPB7kSoxMBn3euWFok4tCA9b1dCYDpanjU5.0SWOn/rRtUwZ900"
+        shell: /bin/bash
+        createhome: True
+        home: "/home/{{ item }}"
+      with_items:
+        - admin1
+        - admin2
+        - admin3
 
     - name: configure ssh for jumping
       blockinfile:
@@ -295,35 +326,17 @@
       command: "/usr/local/src/miniconda.sh -b -p /mnt/home/miniconda3"
       when: not miniconda.stat.exists
 
-    - name: install matplotlib
-      command: conda install matplotlib==1.5.1 -y
+    - name: install qiime2
+      command: "{{ item }}"
       environment:
         PATH: /mnt/home/miniconda3/bin:$PATH
-
-    - name: install qiime, q2cli, q2-types, and q2-feature-table
-      command: conda install -c qiime2 qiime q2cli q2-types q2-feature-table -y
-      environment:
-        PATH: /mnt/home/miniconda3/bin:$PATH
-
-    - name: install q2-diversity, q2-emperor, emperor
-      command: conda install -c qiime2 -c conda-forge q2-diversity q2-emperor emperor=1.0.0beta5 -y
-      environment:
-        PATH: /mnt/home/miniconda3/bin:$PATH
-
-    - name: install dada2, mafft
-      command: conda install -c bioconda -c r bioconductor-dada2 mafft -y
-      environment:
-        PATH: /mnt/home/miniconda3/bin:$PATH
-
-    - name: install fasttree
-      command: conda install -c biocore fasttree -y
-      environment:
-        PATH: /mnt/home/miniconda3/bin:$PATH
-
-    - name: install q2-deumx, q2-alignment, q2-phylogeny, q2-dada2, q2-composition, q2-taxa, q2-feature-classifier
-      command: conda install -c qiime2 q2-demux q2-alignment q2-phylogeny q2-dada2 q2-composition q2-taxa q2-feature-classifier -y
-      environment:
-        PATH: /mnt/home/miniconda3/bin:$PATH
+      with_items:
+        - conda install matplotlib==1.5.1 -y
+        - conda install -c qiime2 qiime q2cli q2-types q2-feature-table -y
+        - conda install -c qiime2 -c conda-forge q2-diversity q2-emperor emperor=1.0.0beta5 -y
+        - conda install -c bioconda -c r bioconductor-dada2 mafft -y
+        - conda install -c biocore fasttree -y
+        - conda install -c qiime2 q2-demux q2-alignment q2-phylogeny q2-dada2 q2-composition q2-taxa q2-feature-classifier -y
 
     - name: restart services
       service:

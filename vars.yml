@@ -13,6 +13,8 @@ eip: 35.161.218.38
 vpc_cidr_block: 172.23.0.0/16
 workshop_key_fn: workshopkey-private.pem
 accts_per_host: 7
+domain: bact.workshops.qiime2.org
+email: matthewrdillon@gmail.com
 
 security_groups:
   - name: "{{ group_name }}"
@@ -25,6 +27,10 @@ security_groups:
       - proto: tcp
         from_port: 80
         to_port: 80
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 443
+        to_port: 443
         cidr_ip: 0.0.0.0/0
       - proto: tcp
         from_port: 111
