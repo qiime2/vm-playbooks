@@ -3,10 +3,14 @@
 ec2_region: us-west-2
 image_id: ami-a9d276c9
 jump_host_type: t2.nano
+# jump_host_type: m4.4xlarge
 compute_host_type: t2.nano
+# compute_host_type: m4.2xlarge
 compute_host_count: 1
+# compute_host_count: 12
 accts_per_host: 7
 volume_size: 8
+# volume_size: 50
 
 workshop_name: "{{ lookup('env', 'QIIME_WORKSHOP_NAME') }}"
 eip: "{{ lookup('env', 'QIIME_EIP') }}"
