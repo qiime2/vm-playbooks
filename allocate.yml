@@ -4,27 +4,37 @@
   hosts: localhost
   connection: local
   vars_files:
-    - vars/env.yml
+    - vars.yml
   tasks:
     - name: create vpc
       ec2_vpc:
         state: present
-        internet_gateway: true
-        cidr_block: 172.23.0.0/16
+        internet_gateway: True
+        cidr_block: "{{ vpc_cidr_block }}"
         resource_tags:
           Name: "{{ workshop_name }}"
           Environment: "{{ workshop_name }}"
         region: "{{ ec2_region }}"
+        subnets:
+          - cidr: "{{ vpc_cidr_block }}"
+            resource_tags:
+              Name: "{{ workshop_name }} subnet"
+        route_tables:
+          - subnets:
+            - "{{ vpc_cidr_block }}"
+            routes:
+              - dest: 0.0.0.0/0
+                gw: igw
       register: vpc
 
-    - name: create vpc subnet
+    - name: get subnet
       ec2_vpc_subnet:
-        state: present
         vpc_id: "{{ vpc.vpc_id }}"
         region: "{{ ec2_region }}"
-        cidr: 172.23.5.0/24
+        cidr: "{{ vpc_cidr_block }}"
         resource_tags:
           Name: "{{ workshop_name }} subnet"
+        state: present
       register: subnet
 
     - name: create security groups
@@ -34,12 +44,27 @@
         rules: "{{ item.rules }}"
         region: "{{ ec2_region }}"
         vpc_id: "{{ vpc.vpc_id }}"
+        state: present
       with_items: "{{ security_groups }}"
+
+    - name: create keypair
+      ec2_key:
+        name: "{{ workshop_name }}"
+        region: "{{ ec2_region }}"
+        state: present
+      register: key
+
+    - name: save keypair to localhost
+      copy:
+        content: "{{ key.key.private_key }}"
+        dest: "./{{ workshop_key_fn }}"
+        mode: 0600
+      when: key.changed
 
     - name: allocate jump host instance
       ec2:
         region: "{{ ec2_region }}"
-        keypair: "{{ item.keypair }}"
+        keypair: "{{ key.key.name }}"
         group: "{{ item.group }}"
         vpc_subnet_id: "{{ subnet.subnet.id }}"
         instance_type: "{{ item.instance_type }}"
@@ -47,14 +72,48 @@
         instance_tags: "{{ item.instance_tags }}"
         exact_count: "{{ item.exact_count }}"
         count_tag: "{{ item.count_tag }}"
-        wait: true
-      register: jump_host
+        wait: True
+        volumes:
+          - device_name: /dev/sda1
+            delete_on_termination: False
+            volume_type: gp2
+            volume_size: "{{ volume_size }}"
       with_items: "{{ ec2_jump_host_instances }}"
 
-    - name: allocate worker instances
+    - name: get jump host info
+      ec2_remote_facts:
+        region: "{{ ec2_region }}"
+        filters:
+          instance.group-name: "{{ group_name }}"
+          "tag:Name": "{{ jump_host_name }}"
+      register: jump_hosts
+
+    - name: assign elastic ip to jump host
+      ec2_eip:
+        region: "{{ ec2_region }}"
+        device_id: "{{ jump_hosts.instances[0].id }}"
+        ip: "{{ eip }}"
+
+    - name: add jump host to inventory
+      add_host:
+        name: "{{ eip }}"
+        groups: jump_hosts, all_hosts
+
+    - name: allocate ebs
+      ec2_vol:
+        region: "{{ ec2_region }}"
+        name: "{{ workshop_name }}"
+        instance: "{{ jump_hosts.instances[0].id }}"
+        volume_size: "{{ volume_size }}"
+        volume_type: gp2
+        device_name: /dev/xvdb
+        state: present
+      register: ebs_vol
+
+    - name: allocate compute instances
       ec2:
         region: "{{ ec2_region }}"
-        keypair: "{{ item.keypair }}"
+        keypair: "{{ key.key.name }}"
         group: "{{ item.group }}"
         vpc_subnet_id: "{{ subnet.subnet.id }}"
         instance_type: "{{ item.instance_type }}"
@@ -62,12 +121,327 @@
         instance_tags: "{{ item.instance_tags }}"
         exact_count: "{{ item.exact_count }}"
         count_tag: "{{ item.count_tag }}"
-        wait: true
-      register: worker_hosts
-      with_items: "{{ ec2_worker_instances }}"
+        assign_public_ip: True
+        volumes:
+          - device_name: /dev/sda1
+            delete_on_termination: False
+            volume_type: gp2
+            volume_size: "{{ volume_size }}"
+        wait: True
+      register: compute_hosts
+      with_items: "{{ ec2_compute_instances }}"
 
-    - name: assign public ip to jump host
-      ec2_eip:
-        region: "{{ ec2_region }}"
-        device_id: "{{ jump_host.results[0].tagged_instances[0].id }}"
-        ip: "{{ eip }}"
+    - name: add compute hosts to inventory
+      add_host:
+        name: "{{ item.1.public_ip }}"
+        groups: all_hosts, compute_hosts
+      with_subelements:
+        - "{{ compute_hosts.results }}"
+        - tagged_instances
+
+    - name: add vars to dynamic groups
+      add_host:
+        name: "{{ item.1 }}"
+        groups: compute_hosts
+        grp: "worker{{ item.0 }}"
+      with_indexed_items: "{{ groups['compute_hosts'] }}"
+
+    - name: check if users files already exist
+      stat:
+        path: roster.json
+      register: roster
+
+    - name: generate account info
+      command: "python {{ playbook_dir }}/generate_accts.py '{{ ec2_compute_instances | to_json }}' {{ accts_per_host }}"
+      when: not roster.stat.exists
+
+    - pause: seconds=60
+
+- hosts: all_hosts
+  remote_user: ubuntu
+  gather_facts: False
+  tasks:
+    - name: bootstrap python
+      raw: sudo apt-get install -y python
+
+- hosts: all_hosts
+  remote_user: ubuntu
+  become: True
+  vars_files:
+    - vars.yml
+  tasks:
+    - name: update all packages to the latest version
+      apt:
+        upgrade: dist
+
+    - name: create groups
+      group:
+        name: "{{ hostvars[item]['grp'] }}"
+        state: present
+      with_items: "{{ groups['compute_hosts'] }}"
+
+    - name: set up ssh (general)
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      with_items:
+        - { regexp: '^PasswordAuthentication.*$', line: 'PasswordAuthentication yes' }
+        - { regexp: '^.*Port.*$', line: 'Port 22' }
+        - { regexp: '^.*MaxStartups.*$', line: 'MaxStartups 200' }
+
+    - name: restart ssh
+      service:
+        name: ssh
+        state: restarted
+
+- hosts: jump_hosts
+  remote_user: ubuntu
+  become: True
+  vars_files:
+    - vars.yml
+  vars:
+    users: "{{ lookup('file', 'roster.json') | from_json }}"
+  tasks:
+    - name: set up prereqs
+      apt:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - letsencrypt
+        - nginx
+        - nfs-common
+        - nfs-kernel-server
+        - htop
+
+    - name: set up nginx
+      template:
+        src: nginx.conf
+        dest: /etc/nginx/sites-available/default
+
+    - name: restart services
+      service:
+        name: nginx
+        state: restarted
+
+    - name: set up letsencrypt
+      command: "letsencrypt certonly --agree-tos --email {{ email }} -n -a webroot --webroot-path=/var/www/html -d {{ domain }}"
+      args:
+        creates: /etc/letsencrypt
+
+#     - name: make sure certs dir is present
+#       file:
+#         path: /etc/letsencrypt
+#         state: directory
+#
+#     - name: copy certs
+#       unarchive:
+#         src: letsencrypt/certs.tar.gz
+#         dest: /etc/letsencrypt
+
+    - name: update nginx
+      replace:
+        dest: /etc/nginx/sites-available/default
+        regexp: "#"
+        replace: ""
+
+    - name: update nginx (part 2)
+      lineinfile:
+        dest: /etc/nginx/sites-available/default
+        regexp: "listen 80 default_server;"
+        line: ""
+
+    - name: create mount point
+      file:
+        path: /mnt/home
+        state: directory
+        mode: 0777
+        owner: ubuntu
+        group: ubuntu
+
+    - name: prep shared drive filesystem
+      filesystem:
+        fstype: ext4
+        dev: /dev/xvdb
+
+    - name: mount ebs
+      mount:
+        name: /mnt/home
+        src: /dev/xvdb
+        fstype: auto
+        state: mounted
+
+    - name: set up nfs server
+      lineinfile:
+        dest: /etc/exports
+        insertafter: EOF
+        line: "/mnt/home {{ vpc_cidr_block }}(rw,nohide,fsid=0,insecure,no_subtree_check,async)"
+
+    - name: set up /etc/skel/.bashrc
+      lineinfile:
+        dest: /etc/skel/.bashrc
+        line: "{{ item }}"
+      with_items:
+        - export PATH="/mnt/home/miniconda3/bin:$PATH"
+        - source tab-qiime
+
+    - name: create matplotlib config dirs and ssh dir
+      file:
+        path: "{{ item.path }}"
+        state: "{{ item.state }}"
+      with_items:
+        - { path: '/etc/skel/.config', state: 'directory'}
+        - { path: '/etc/skel/.config/matplotlib', state: 'directory'}
+        - { path: '/etc/skel/.config/matplotlib/matplotlibrc', state: 'touch' }
+        - { path: '/etc/skel/workshop', state: 'directory' }
+
+    - name: set up /etc/skel/.config/matplotlib/matplotlibrc
+      lineinfile:
+        dest: /etc/skel/.config/matplotlib/matplotlibrc
+        line: "{{ item }}"
+      with_items:
+        - "backend: agg"
+
+    - name: create user accounts
+      user:
+        name: "{{ item.name }}"
+        password: "{{ item.hash }}"
+        group: "{{ item.group }}"
+        uid: "{{ item.uid }}"
+        shell: /bin/bash
+        createhome: True
+        home: "/mnt/home/{{ item.name }}"
+      with_items: "{{ users }}"
+
+    - name: create admin accounts
+      user:
+        name: "{{ item }}"
+        password: "$6$rounds=656000$ycPDEjJbFznV6P00$Vp1EqUejMU/GVaLgO04Qv6XuZ5M3p3tPakCrPB7kSoxMBn3euWFok4tCA9b1dCYDpanjU5.0SWOn/rRtUwZ900"
+        shell: /bin/bash
+        createhome: True
+        home: "/home/{{ item }}"
+      with_items:
+        - admin1
+        - admin2
+        - admin3
+
+    - name: configure ssh for jumping
+      blockinfile:
+        dest: /etc/ssh/sshd_config
+        marker: "# {mark} ANSIBLE MANAGED BLOCK - {{ item }}"
+        block: |
+          Match Group {{ hostvars[item]['grp'] }}
+              ForceCommand ssh {{ item }}
+      with_items: "{{ groups['compute_hosts'] }}"
+
+    - name: check if miniconda3 dir exists
+      stat:
+        path: /mnt/home/miniconda3
+      register: miniconda
+
+    - name: download miniconda
+      get_url:
+        url: https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+        dest: /usr/local/src/miniconda.sh
+        mode: u+rx
+      when: not miniconda.stat.exists
+
+    - name: install miniconda
+      command: "/usr/local/src/miniconda.sh -b -p /mnt/home/miniconda3"
+      when: not miniconda.stat.exists
+
+    - name: install qiime2
+      command: "{{ item }}"
+      environment:
+        PATH: /mnt/home/miniconda3/bin:$PATH
+      with_items:
+        - conda install matplotlib==1.5.1 -y
+        - conda install -c qiime2 qiime q2cli q2-types q2-feature-table -y
+        - conda install -c qiime2 -c conda-forge q2-diversity q2-emperor emperor=1.0.0beta5 -y
+        - conda install -c bioconda -c r bioconductor-dada2 mafft -y
+        - conda install -c biocore fasttree -y
+        - conda install -c qiime2 q2-demux q2-alignment q2-phylogeny q2-dada2 q2-composition q2-taxa q2-feature-classifier -y
+
+    - name: restart services
+      service:
+        name: "{{ item }}"
+        state: restarted
+      with_items:
+        - ssh
+        - nfs-kernel-server
+        - nginx
+
+- hosts: compute_hosts
+  remote_user: ubuntu
+  become: True
+  vars_files:
+    - vars.yml
+  vars:
+    users: "{{ lookup('file', 'roster.json') | from_json }}"
+  tasks:
+    - name: set up prereqs
+      apt:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - nfs-common
+        - htop
+
+    - name: create mount point
+      file:
+        path: /mnt/home
+        state: directory
+        mode: 0777
+        owner: ubuntu
+        group: ubuntu
+
+    - name: mount nfs share (homedirs)
+      mount:
+        name: /mnt/home
+        src: "{{ hostvars.localhost.jump_hosts.instances[0].private_ip_address }}:/"
+        fstype: nfs
+        state: mounted
+
+    - name: update fstab
+      lineinfile:
+        dest: /etc/fstab
+        insertafter: EOF
+        line: "{{ hostvars.localhost.jump_hosts.instances[0].private_ip_address }}:/ /mnt/home nfs auto 0 0"
+
+    - name: create user accounts
+      user:
+        name: "{{ item.name }}"
+        password: "{{ item.hash }}"
+        group: "{{ item.group }}"
+        uid: "{{ item.uid }}"
+        shell: /bin/bash
+        createhome: False
+        home: "/mnt/home/{{ item.name }}"
+      with_items: "{{ users }}"
+
+    - name: remove known_hosts
+      file:
+        path: "/mnt/home/{{ item.name }}/.ssh/known_hosts"
+        state: absent
+      with_items: "{{ users }}"
+
+    - name: shared data dir
+      file:
+        path: "/mnt/home/{{ item }}"
+        state: directory
+        mode: 0777
+      with_items:
+        - shared
+        - shared/qiime2-moving-pictures-tutorial
+        - shared/qiime2-moving-pictures-tutorial/raw-sequences
+
+    - name: download data
+      get_url:
+        url: "{{ item.url }}"
+        dest: "/mnt/home/shared/qiime2-moving-pictures-tutorial/{{ item.dest }}"
+        mode: 0777
+        force: False
+      with_items:
+        - { url: "https://docs.google.com/spreadsheets/d/1_3ZbqCtAYx-9BJYHoWlICkVJ4W_QGMfJRPLedt_0hws/export?gid=0&format=tsv", dest: "sample-metadata.tsv" }
+        - { url: "https://data.qiime2.org/2.0.6/tutorials/moving-pictures/raw-sequences/barcodes.fastq.gz", dest: "raw-sequences/barcodes.fastq.gz" }
+        - { url: "https://data.qiime2.org/2.0.6/tutorials/moving-pictures/raw-sequences/sequences.fastq.gz", dest: "raw-sequences/sequences.fastq.gz" }

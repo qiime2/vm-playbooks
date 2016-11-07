@@ -1,3 +1,6 @@
 venv
-site.retry
+*.retry
 .DS_Store
+*.pem
+*.csv
+*.json
