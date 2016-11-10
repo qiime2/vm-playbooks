@@ -87,9 +87,9 @@ if __name__=='__main__':
             'uid': uid,
         }
         json_users.append(json_record)
-    with open('roster.csv', 'w') as fh:
+    with open('../tmp/roster.csv', 'w') as fh:
         w = csv.DictWriter(fh, ['name', 'password', 'group'])
         w.writeheader()
         w.writerows(csv_users)
-    with open('roster.json', 'w') as fh:
+    with open('../tmp/roster.json', 'w') as fh:
         json.dump(json_users, fh)

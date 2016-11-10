@@ -3,4 +3,5 @@ venv
 .DS_Store
 *.pem
 *.csv
-*.json
+tmp/*
+!tmp/.gitkeep

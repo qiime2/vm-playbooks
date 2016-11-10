@@ -1,0 +1,30 @@
+---
+# This role installs miniconda + qiime2 core distribution
+
+    - name: check if miniconda3 dir exists
+      stat:
+        path: /mnt/home/miniconda3
+      register: miniconda
+
+    - name: download miniconda
+      get_url:
+        url: https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+        dest: /usr/local/src/miniconda.sh
+        mode: u+rx
+      when: not miniconda.stat.exists
+
+    - name: install miniconda
+      command: "/usr/local/src/miniconda.sh -b -p /mnt/home/miniconda3"
+      when: not miniconda.stat.exists
+
+    - name: install qiime2
+      command: "{{ item }}"
+      environment:
+        PATH: /mnt/home/miniconda3/bin:$PATH
+      with_items:
+        - conda install matplotlib==1.5.1 -y
+        - conda install -c qiime2 qiime q2cli q2-types q2-feature-table -y
+        - conda install -c qiime2 -c conda-forge q2-diversity q2-emperor emperor=1.0.0beta5 -y
+        - conda install -c bioconda -c r bioconductor-dada2 mafft -y
+        - conda install -c biocore fasttree -y
+        - conda install -c qiime2 q2-demux q2-alignment q2-phylogeny q2-dada2 q2-composition q2-taxa q2-feature-classifier -y
