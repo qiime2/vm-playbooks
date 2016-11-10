@@ -1,14 +1,66 @@
 {
+  "variables": {
+    "ssh_username": "ubuntu",
+    "ssh_password": "ubuntu",
+    "ssh_fullname": "QIIME 2 User",
+    "hostname": "qiime2"
+  },
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "apt-get update",
+        "apt-get install -y build-essential python-apt python-pycurl python-dev python-pip",
+        "pip install -U ansible"
+      ]
+    },
+    {
+      "type": "ansible-local",
+      "playbook_file": "./playbooks/packer-qiime2.yml"
+    }
+  ],
+
   "builders": [
     {
       "type": "virtualbox-iso",
       "guest_os_type": "Ubuntu_64",
-      "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.5-server-amd64.iso",
-      "iso_checksum": "769474248a3897f4865817446f9a4a53",
+
+      "iso_urls": [
+        "./iso/ubuntu-16.04.1-server-amd64.iso",
+        "http://releases.ubuntu.com/16.04/ubuntu-16.04.1-server-amd64.iso"
+      ],
+      "iso_checksum": "d2d939ca0e65816790375f6826e4032f",
       "iso_checksum_type": "md5",
-      "ssh_username": "packer",
-      "ssh_password": "packer",
-      "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
+
+      "http_directory" : "http",
+      "disk_size" : 10000,
+
+      "ssh_wait_timeout": "20m",
+      "ssh_username": "{{ user `ssh_username` }}",
+      "ssh_password": "{{ user `ssh_password` }}",
+
+      "shutdown_command": "echo {{user `ssh_password`}} | sudo -S shutdown -P now",
+      "boot_command" : [
+        "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "/install/vmlinuz noapic<wait>",
+        " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg<wait>",
+        " debian-installer=en_US auto locale=en_US kbd-chooser/method=us<wait>",
+        " hostname={{ user `hostname` }}<wait>",
+        " fb=false debconf/frontend=noninteractive<wait>",
+        " keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA<wait>",
+        " keyboard-configuration/variant=USA console-setup/ask_detect=false<wait>",
+        " passwd/user-fullname={{ user `ssh_fullname` }}<wait>",
+        " passwd/user-password={{ user `ssh_password` }}<wait>",
+        " passwd/user-password-again={{ user `ssh_password` }}<wait>",
+        " passwd/username={{ user `ssh_username` }}<wait>",
+        " initrd=/install/initrd.gz --- <enter><wait>"
+      ]
+    },
+    {
+      "type": "docker",
+      "image": "ubuntu:16.04",
+      "export_path": "image.tar"
     }
   ]
 }

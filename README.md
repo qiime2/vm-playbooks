@@ -12,6 +12,8 @@ Note, Ansible still requires Python 2
 - Python 2
 - AWS Account
 - A domain to point the infrastructure to
+- A tarball (`certs.tar.gz`) that contains a valid `/etc/letsencrypt` dir
+  (including certs, config, etc.)
 
 ### Setup
 
@@ -34,11 +36,11 @@ $ export QIIME_SSL_EMAIL='example@example.org'
 ### Allocate infrastructure
 
 ```bash
-$ ansible-playbook -i inventory allocate.yml
+$ ansible-playbook -i inventory playbooks/aws-workshop-allocate.yml
 ```
 
 ### Destroy all infrastructure (including EBS Volumes)
 
 ```bash
-$ ansible-playbook -i inventory destroy.yml
+$ ansible-playbook -i inventory playbooks/aws-workshop-destroy.yml
 ```
