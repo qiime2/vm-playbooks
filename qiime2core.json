@@ -11,8 +11,7 @@
       "type": "shell",
       "inline": [
         "echo 'export PATH=/miniconda3/bin:$PATH' | tee -a /root/.bashrc /root/.profile /etc/profile",
-        "echo 'export PATH=/miniconda3/bin:$PATH' > /etc/environment",
-        "echo 'export PATH=/miniconda3/bin:$PATH' > /etc/profile.d/conda.sh",
+        "echo 'export PATH=/miniconda3/bin:$PATH' | tee /etc/environment /etc/profile.d/conda.sh",
         "echo 'export LC_ALL=C.UTF-8' | tee -a /root/.bashrc /root/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh",
         "echo 'export LANG=C.UTF-8' | tee -a /root/.bashrc /root/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh",
         "pip install -U ansible"
@@ -29,6 +28,10 @@
       "role_paths": [
         "./roles/qiime2"
       ]
+    },
+    {
+      "type": "shell",
+      "inline": ["rm -rf ~/.bash_history ~/.ansible"]
     }
   ],
 
@@ -78,21 +81,7 @@
     {
       "type": "docker-tag",
       "repository": "qiime2/core",
-      "tag": "2.0.6",
-      "only": ["docker"]
-    },
-    {
-      "type": "docker-tag",
-      "repository": "qiime2/core",
       "tag": "latest",
-      "only": ["docker"]
-    },
-    {
-      "type": "shell-local",
-      "inline": [
-        "docker run -i -t -d --name q2 qiime2/core:latest /bin/bash",
-	"docker commit -c 'ENV PATH=/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' -c 'ENV LC_ALL=C.UTF-8' -c 'ENV LANG=C.UTF-8' q2 qiime2/core:latest"
-      ],
       "only": ["docker"]
     }
   ]
