@@ -10,13 +10,29 @@
     {
       "type": "shell",
       "inline": [
-        "echo 'export PATH=/miniconda3/bin:$PATH' | tee -a /root/.bashrc /root/.profile /etc/profile",
+        "echo 'export PATH=/miniconda3/bin:$PATH' | tee -a ~/.bashrc ~/.profile /etc/profile",
         "echo 'export PATH=/miniconda3/bin:$PATH' | tee /etc/environment /etc/profile.d/conda.sh",
-        "echo 'export LC_ALL=C.UTF-8' | tee -a /root/.bashrc /root/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh",
-        "echo 'export LANG=C.UTF-8' | tee -a /root/.bashrc /root/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh",
-        "pip install -U ansible"
+        "echo 'export LC_ALL=C.UTF-8' | tee -a ~/.bashrc ~/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh",
+        "echo 'export LANG=C.UTF-8' | tee -a ~/.bashrc ~/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh"
       ],
       "only": ["docker"]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "echo 'export PATH=/miniconda3/bin:$PATH' | tee -a ~/.bashrc ~/.profile",
+        "echo 'export LC_ALL=C.UTF-8' | tee -a ~/.bashrc ~/.profile",
+        "echo 'export LANG=C.UTF-8' | tee -a ~/.bashrc ~/.profile"
+      ],
+      "only": ["virtualbox-iso"]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "mkdir -p ~/.config/matplotlib",
+        "echo 'back: agg'> ~/.config/matplotlib/matplotlibrc",
+        "pip install -U ansible"
+      ]
     },
     {
       "type": "ansible-local",
@@ -59,15 +75,20 @@
         "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
         "/install/vmlinuz noapic<wait>",
         " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg<wait>",
-        " debian-installer=en_US auto locale=en_US kbd-chooser/method=us<wait>",
+        " auto<wait>",
         " hostname={{ user `hostname` }}<wait>",
-        " fb=false debconf/frontend=noninteractive<wait>",
-        " keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA<wait>",
-        " keyboard-configuration/variant=USA console-setup/ask_detect=false<wait>",
+        " fb=false<wait>",
+        " debconf/frontend=noninteractive<wait>",
+        " debian-installer=en_US<wait>",
+        " locale=en_US<wait>",
         " passwd/user-fullname={{ user `ssh_fullname` }}<wait>",
         " passwd/user-password={{ user `ssh_password` }}<wait>",
         " passwd/user-password-again={{ user `ssh_password` }}<wait>",
         " passwd/username={{ user `ssh_username` }}<wait>",
+        " console-setup/ask_detect=false<wait>",
+        " keyboard-configuration/variant=USA<wait>",
+        " keyboard-configuration/layout=USA<wait>",
+        " kbd-chooser/method=us<wait>",
         " initrd=/install/initrd.gz --- <enter><wait>"
       ]
     },
