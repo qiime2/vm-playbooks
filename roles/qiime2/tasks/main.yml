@@ -3,7 +3,7 @@
 
     - name: check if miniconda3 dir exists
       stat:
-        path: /mnt/home/miniconda3
+        path: "{{ miniconda_path }}"
       register: miniconda
 
     - name: download miniconda
@@ -14,17 +14,17 @@
       when: not miniconda.stat.exists
 
     - name: install miniconda
-      command: "/usr/local/src/miniconda.sh -b -p /mnt/home/miniconda3"
+      command: "/usr/local/src/miniconda.sh -b -p {{ miniconda_path }}"
       when: not miniconda.stat.exists
 
     - name: install qiime2
       command: "{{ item }}"
       environment:
-        PATH: /mnt/home/miniconda3/bin:$PATH
+        PATH: "{{ miniconda_path }}/bin:$PATH"
       with_items:
         - conda install matplotlib==1.5.1 -y
         - conda install -c qiime2 qiime q2cli q2-types q2-feature-table -y
-        - conda install -c qiime2 -c conda-forge q2-diversity q2-emperor emperor=1.0.0beta5 -y
-        - conda install -c bioconda -c r bioconductor-dada2 mafft -y
-        - conda install -c biocore fasttree -y
-        - conda install -c qiime2 q2-demux q2-alignment q2-phylogeny q2-dada2 q2-composition q2-taxa q2-feature-classifier -y
+          #        - conda install -c qiime2 -c conda-forge q2-diversity q2-emperor emperor=1.0.0beta5 -y
+          #        - conda install -c bioconda -c r bioconductor-dada2 mafft -y
+          #        - conda install -c biocore fasttree -y
+          #        - conda install -c qiime2 q2-demux q2-alignment q2-phylogeny q2-dada2 q2-composition q2-taxa q2-feature-classifier -y

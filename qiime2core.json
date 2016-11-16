@@ -1,7 +1,7 @@
 {
   "variables": {
-    "ssh_username": "ubuntu",
-    "ssh_password": "ubuntu",
+    "ssh_username": "qiime2",
+    "ssh_password": "qiime2",
     "ssh_fullname": "QIIME 2 User",
     "hostname": "qiime2"
   },
@@ -10,14 +10,24 @@
     {
       "type": "shell",
       "inline": [
-        "apt-get update",
-        "apt-get install -y build-essential python-apt python-pycurl python-dev python-pip",
-        "pip install -U ansible"
-      ]
+        "pip install -U ansible",
+        "echo PATH=/miniconda3/bin:$PATH | tee -a /root/.bashrc /etc/profile",
+        "echo PATH=/miniconda3/bin:$PATH > /etc/environment",
+        "echo 'LC_ALL=C.UTF-8' | tee -a /root/.bashrc /etc/profile",
+        "echo 'LANG=C.UTF-8' | tee -a /root/.bashrc /etc/profile"
+      ],
+      "only": ["docker"]
     },
     {
       "type": "ansible-local",
-      "playbook_file": "./playbooks/packer-qiime2.yml"
+      "playbook_file": "./playbooks/packer-qiime2.yml",
+      "inventory_groups": "default",
+      "extra_arguments": [
+        "--extra-vars \"miniconda_path=/miniconda3\""
+      ],
+      "role_paths": [
+        "./roles/qiime2"
+      ]
     }
   ],
 
@@ -59,8 +69,11 @@
     },
     {
       "type": "docker",
-      "image": "ubuntu:16.04",
-      "export_path": "image.tar"
+      "image": "python:3.5",
+      "export_path": "image.tar",
+      "run_command": [
+        "-d", "-i", "-t", "{{ .Image }}", "/bin/bash"
+      ]
     }
   ]
 }
