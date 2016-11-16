@@ -10,11 +10,12 @@
     {
       "type": "shell",
       "inline": [
-        "pip install -U ansible",
-        "echo PATH=/miniconda3/bin:$PATH | tee -a /root/.bashrc /etc/profile",
-        "echo PATH=/miniconda3/bin:$PATH > /etc/environment",
-        "echo 'LC_ALL=C.UTF-8' | tee -a /root/.bashrc /etc/profile",
-        "echo 'LANG=C.UTF-8' | tee -a /root/.bashrc /etc/profile"
+        "echo 'export PATH=/miniconda3/bin:$PATH' | tee -a /root/.bashrc /root/.profile /etc/profile",
+        "echo 'export PATH=/miniconda3/bin:$PATH' > /etc/environment",
+        "echo 'export PATH=/miniconda3/bin:$PATH' > /etc/profile.d/conda.sh",
+        "echo 'export LC_ALL=C.UTF-8' | tee -a /root/.bashrc /root/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh",
+        "echo 'export LANG=C.UTF-8' | tee -a /root/.bashrc /root/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh",
+        "pip install -U ansible"
       ],
       "only": ["docker"]
     },
@@ -70,10 +71,29 @@
     {
       "type": "docker",
       "image": "python:3.5",
-      "export_path": "image.tar",
-      "run_command": [
-        "-d", "-i", "-t", "{{ .Image }}", "/bin/bash"
-      ]
+      "commit": "true"
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "docker-tag",
+      "repository": "qiime2/core",
+      "tag": "2.0.6",
+      "only": ["docker"]
+    },
+    {
+      "type": "docker-tag",
+      "repository": "qiime2/core",
+      "tag": "latest",
+      "only": ["docker"]
+    },
+    {
+      "type": "shell-local",
+      "inline": [
+        "docker run -i -t -d --name q2 qiime2/core:latest /bin/bash",
+	"docker commit -c 'ENV PATH=/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' -c 'ENV LC_ALL=C.UTF-8' -c 'ENV LANG=C.UTF-8' q2 qiime2/core:latest"
+      ],
+      "only": ["docker"]
     }
   ]
 }

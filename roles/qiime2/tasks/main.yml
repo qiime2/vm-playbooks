@@ -28,3 +28,8 @@
           #        - conda install -c bioconda -c r bioconductor-dada2 mafft -y
           #        - conda install -c biocore fasttree -y
           #        - conda install -c qiime2 q2-demux q2-alignment q2-phylogeny q2-dada2 q2-composition q2-taxa q2-feature-classifier -y
+
+    - name: run qiime2 to build cache
+      command: "qiime"
+      environment:
+        PATH: "{{ miniconda_path }}/bin:$PATH"
