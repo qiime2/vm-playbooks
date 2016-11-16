@@ -7,6 +7,7 @@
       register: miniconda
 
     - name: download miniconda
+      become: true
       get_url:
         url: https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
         dest: /usr/local/src/miniconda.sh
@@ -14,22 +15,25 @@
       when: not miniconda.stat.exists
 
     - name: install miniconda
+      become: true
       command: "/usr/local/src/miniconda.sh -b -p {{ miniconda_path }}"
       when: not miniconda.stat.exists
 
     - name: install qiime2
+      become: true
       command: "{{ item }}"
       environment:
         PATH: "{{ miniconda_path }}/bin:$PATH"
       with_items:
         - conda install matplotlib==1.5.1 -y
-        - conda install -c qiime2 qiime q2cli q2-types q2-feature-table -y
-        - conda install -c qiime2 -c conda-forge q2-diversity q2-emperor emperor=1.0.0beta5 -y
-        - conda install -c bioconda -c r bioconductor-dada2 mafft -y
         - conda install -c biocore fasttree -y
-        - conda install -c qiime2 q2-demux q2-alignment q2-phylogeny q2-dada2 q2-composition q2-taxa q2-feature-classifier -y
+        - conda install -c bioconda -c r bioconductor-dada2 mafft -y
+        - conda install -c qiime2 qiime q2cli q2-types q2-feature-table -y
+        - conda install -c qiime2 -c conda-forge q2-diversity q2-emperor -y
+        - conda install -c qiime2 q2-alignment q2-phylogeny q2-dada2 q2-demux -y
+        - conda install -c qiime2 q2-composition q2-feature-classifier q2-taxa -y
 
-    - name: run qiime2 to build cache
-      command: "qiime"
+    - name: (re)build qiime2 cache
+      command: "qiime dev refresh-cache"
       environment:
         PATH: "{{ miniconda_path }}/bin:$PATH"

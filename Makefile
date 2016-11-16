@@ -1,4 +1,5 @@
 CORE_VERSION := "2.0.6"
+HOSTNAME := "qiime2core2-0-6"
 
 .PHONY: help
 help:
@@ -11,9 +12,26 @@ help:
 docker:
 	packer build --only=docker qiime2core.json
 	docker run -i -t -d --name q2 qiime2/core:latest /bin/bash
-	docker commit -c 'ENV PATH=/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' -c 'ENV LC_ALL=C.UTF-8' -c 'ENV LANG=C.UTF-8' -c 'VOLUME ["/data"]' q2 qiime2/core:latest
+	docker commit \
+		-c 'ENV PATH=/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
+		-c 'ENV LC_ALL=C.UTF-8' \
+		-c 'ENV LANG=C.UTF-8' \
+		-c 'VOLUME ["/data"]' \
+		-c 'WORKDIR /data' \
+		q2 qiime2/core:latest
 	docker stop q2 && docker rm q2 && docker tag qiime2/core:latest qiime2/core:$(CORE_VERSION)
+
+.PHONY: aws
+aws:
+	packer build \
+		--only=amazon-ebs \
+		-var 'core_version=$(CORE_VERSION)' \
+		qiime2core.json
 
 .PHONY: virtualbox
 virtualbox:
-	packer build --only=virtualbox-iso qiime2core.json
+	packer build \
+		--only=virtualbox-iso \
+		-var 'core_version=$(CORE_VERSION)' \
+		-var 'hostname=$(HOSTNAME)' \
+		qiime2core.json

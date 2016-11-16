@@ -2,8 +2,7 @@
   "variables": {
     "ssh_username": "qiime2",
     "ssh_password": "qiime2",
-    "ssh_fullname": "QIIME 2 User",
-    "hostname": "qiime2"
+    "ssh_fullname": "QIIME 2 User"
   },
 
   "provisioners": [
@@ -13,37 +12,40 @@
         "echo 'export PATH=/miniconda3/bin:$PATH' | tee -a ~/.bashrc ~/.profile /etc/profile",
         "echo 'export PATH=/miniconda3/bin:$PATH' | tee /etc/environment /etc/profile.d/conda.sh",
         "echo 'export LC_ALL=C.UTF-8' | tee -a ~/.bashrc ~/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh",
-        "echo 'export LANG=C.UTF-8' | tee -a ~/.bashrc ~/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh"
+        "echo 'export LANG=C.UTF-8' | tee -a ~/.bashrc ~/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh",
+        "pip install -U ansible"
       ],
       "only": ["docker"]
     },
     {
       "type": "shell",
       "inline": [
-        "echo 'export PATH=/miniconda3/bin:$PATH' | tee -a ~/.bashrc ~/.profile",
-        "echo 'export LC_ALL=C.UTF-8' | tee -a ~/.bashrc ~/.profile",
-        "echo 'export LANG=C.UTF-8' | tee -a ~/.bashrc ~/.profile"
+        "sudo apt -y install software-properties-common",
+        "sudo apt-add-repository ppa:ansible/ansible",
+        "sudo apt -y update",
+        "sudo apt -y install ansible",
+        "sudo useradd {{ user `ssh_username` }} -s /bin/bash -m",
+        "sudo usermod -aG sudo {{ user `ssh_username` }}",
+        "echo '{{ user `ssh_username` }}:{{ user `ssh_password` }}' | sudo chpasswd",
+        "echo 'export PATH=/miniconda3/bin:$PATH' | sudo tee -a /home/ubuntu/.bashrc /home/ubuntu/.profile /home/{{ user `ssh_username` }}/.bashrc /home/{{ user `ssh_username` }}/.profile",
+        "mkdir -p /home/{{ user `ssh_username` }}/.config/matplotlib",
+        "echo 'backend: agg'> /home/{{ user `ssh_username` }}/.config/matplotlib/matplotlibrc"
       ],
-      "only": ["virtualbox-iso"]
+      "only": ["virtualbox-iso", "amazon-ebs"]
     },
     {
       "type": "shell",
       "inline": [
         "mkdir -p ~/.config/matplotlib",
-        "echo 'back: agg'> ~/.config/matplotlib/matplotlibrc",
-        "pip install -U ansible"
+        "echo 'backend: agg'> ~/.config/matplotlib/matplotlibrc"
       ]
     },
     {
       "type": "ansible-local",
       "playbook_file": "./playbooks/packer-qiime2.yml",
       "inventory_groups": "default",
-      "extra_arguments": [
-        "--extra-vars \"miniconda_path=/miniconda3\""
-      ],
-      "role_paths": [
-        "./roles/qiime2"
-      ]
+      "extra_arguments": ["--extra-vars \"miniconda_path=/miniconda3\""],
+      "role_paths": ["./roles/qiime2"]
     },
     {
       "type": "shell",
@@ -55,21 +57,18 @@
     {
       "type": "virtualbox-iso",
       "guest_os_type": "Ubuntu_64",
-
+      "vm_name": "QIIME 2 Core - {{ user `core_version` }}",
       "iso_urls": [
         "./iso/ubuntu-16.04.1-server-amd64.iso",
         "http://releases.ubuntu.com/16.04/ubuntu-16.04.1-server-amd64.iso"
       ],
       "iso_checksum": "d2d939ca0e65816790375f6826e4032f",
       "iso_checksum_type": "md5",
-
       "http_directory" : "http",
       "disk_size" : 10000,
-
       "ssh_wait_timeout": "20m",
       "ssh_username": "{{ user `ssh_username` }}",
       "ssh_password": "{{ user `ssh_password` }}",
-
       "shutdown_command": "echo {{user `ssh_password`}} | sudo -S shutdown -P now",
       "boot_command" : [
         "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
@@ -80,11 +79,11 @@
         " fb=false<wait>",
         " debconf/frontend=noninteractive<wait>",
         " debian-installer=en_US<wait>",
-        " locale=en_US<wait>",
-        " passwd/user-fullname={{ user `ssh_fullname` }}<wait>",
-        " passwd/user-password={{ user `ssh_password` }}<wait>",
-        " passwd/user-password-again={{ user `ssh_password` }}<wait>",
-        " passwd/username={{ user `ssh_username` }}<wait>",
+        " locale=en_US.UTF-8<wait>",
+        " passwd/user-fullname=ubuntu<wait>",
+        " passwd/username=ubuntu<wait>",
+        " passwd/user-password=ubuntu<wait>",
+        " passwd/user-password-again=ubuntu<wait>",
         " console-setup/ask_detect=false<wait>",
         " keyboard-configuration/variant=USA<wait>",
         " keyboard-configuration/layout=USA<wait>",
@@ -96,8 +95,17 @@
       "type": "docker",
       "image": "python:3.5",
       "commit": "true"
+    },
+    {
+      "type": "amazon-ebs",
+      "instance_type": "m1.small",
+      "region": "us-west-2",
+      "source_ami": "ami-13e24f73",
+      "ami_name": "qiime2 {{ timestamp }}",
+      "ssh_username": "ubuntu"
     }
   ],
+
   "post-processors": [
     {
       "type": "docker-tag",
