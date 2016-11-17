@@ -1,10 +1,47 @@
-# Workshops Playbooks
+# QIIME 2 Playbooks
 
 Note, Ansible still requires Python 2
 ([3 is coming](http://docs.ansible.com/ansible/python_3_support.html)).
 
 
-## Quickstart
+## Release Images Quickstart
+
+### Prereqs
+
+- Packer
+- AWS Account
+
+### Docker
+
+```bash
+# Build the docker image locally
+$ make docker
+# After inspecting the image, login to Docker Hub:
+$ docker login
+# Then push the build up:
+$ docker push qiime2/core
+```
+
+### Virtualbox
+
+```bash
+# Build the Virtualbox machine locally
+$ make virtualbox
+# Once done, upload the VMDK file to distribution server
+```
+
+### Amazon AWS AMI
+
+```bash
+# Set up AWS credentials
+$ export AWS_ACCESS_KEY_ID='AK123'
+$ export AWS_SECRET_ACCESS_KEY='abc123'
+# Build the AWS image
+$ make aws
+# Once done and tested, make the AMI public through the AWS interface
+```
+
+## Workshop Quickstart
 
 ### Prereqs
 
