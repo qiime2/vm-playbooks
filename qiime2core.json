@@ -68,7 +68,7 @@
     {
       "type": "virtualbox-iso",
       "guest_os_type": "Ubuntu_64",
-      "vm_name": "QIIME 2 Core - {{ core_version }}",
+      "vm_name": "QIIME 2 Core - {{ user `core_version` }}",
       "headless": true,
       "iso_urls": [
         "./iso/ubuntu-16.04.1-server-amd64.iso",
