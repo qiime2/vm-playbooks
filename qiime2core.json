@@ -28,8 +28,8 @@
         "sudo usermod -aG sudo {{ user `ssh_username` }}",
         "echo '{{ user `ssh_username` }}:{{ user `ssh_password` }}' | sudo chpasswd",
         "echo 'export PATH=/miniconda3/bin:$PATH' | sudo tee -a /home/ubuntu/.bashrc /home/ubuntu/.profile /home/{{ user `ssh_username` }}/.bashrc /home/{{ user `ssh_username` }}/.profile",
-        "mkdir -p /home/{{ user `ssh_username` }}/.config/matplotlib",
-        "echo 'backend: agg'> /home/{{ user `ssh_username` }}/.config/matplotlib/matplotlibrc"
+        "sudo mkdir -p /home/{{ user `ssh_username` }}/.config/matplotlib",
+        "sudo echo 'backend: agg'> /home/{{ user `ssh_username` }}/.config/matplotlib/matplotlibrc"
       ],
       "only": ["virtualbox-iso", "amazon-ebs"]
     },
