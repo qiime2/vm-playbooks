@@ -26,6 +26,7 @@ aws:
 	packer build \
 		--only=amazon-ebs \
 		-var 'core_version=$(CORE_VERSION)' \
+		-var 'hostname=$(HOSTNAME)' \
 		qiime2core.json
 
 .PHONY: virtualbox

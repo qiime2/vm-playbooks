@@ -35,7 +35,7 @@
       "playbook_file": "./playbooks/packer-qiime2.yml",
       "inventory_groups": "default",
       "extra_arguments": [
-        "--extra-vars 'miniconda_path=/miniconda3 with_users=true ssh_username={{ user `ssh_username` }} ssh_password={{ user `ssh_pass_hash` }}'"
+        "--extra-vars 'miniconda_path=/miniconda3 hostname={{ user `hostname` }} with_users=true ssh_username={{ user `ssh_username` }} ssh_password={{ user `ssh_pass_hash` }}'"
       ],
       "role_paths": [
         "./roles/packer",
@@ -47,13 +47,13 @@
       "type": "ansible-local",
       "playbook_file": "./playbooks/packer-qiime2.yml",
       "inventory_groups": "default",
-      "extra_arguments": ["--extra-vars \"miniconda_path=/miniconda3\""],
+      "extra_arguments": ["--extra-vars 'miniconda_path=/miniconda3 hostname={{ user `hostname` }}'"],
       "role_paths": ["./roles/qiime2"],
       "only": ["docker"]
     },
     {
       "type": "shell",
-      "inline": ["rm -rf ~/.bash_history ~/.ansible /tmp/*"]
+      "inline": ["rm -rf ~/.bash_history ~/.ansible"]
     }
   ],
 

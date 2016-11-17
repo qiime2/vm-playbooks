@@ -4,8 +4,8 @@
   vars:
     with_users: false
     paths:
-      - /etc/skel
-      - '~'
+      - { path: '/etc/skel', owner: 'root' }
+      - { path: '/home/ubuntu', owner: 'ubuntu' }
     bashrclines:
       - "export PATH={{ miniconda_path }}/bin:$PATH"
       - source tab-qiime

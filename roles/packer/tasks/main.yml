@@ -4,26 +4,32 @@
 - name: set up .bashrc
   become: true
   lineinfile:
-    dest: "{{ item[0] }}/.bashrc"
+    dest: "{{ item[0].path }}/.bashrc"
     line: "{{ item[1] }}"
+    owner: "{{ item[0].owner }}"
+    group: "{{ item[0].owner }}"
   with_nested:
-    - paths
-    - bashrclines
+    - "{{ paths }}"
+    - "{{ bashrclines }}"
 
 - name: create matplotlib config dirs
   become: true
   file:
-    path: "{{ item[0] }}/{{ item[1].path }}"
+    path: "{{ item[0].path }}/{{ item[1].path }}"
     state: "{{ item[1].state }}"
+    owner: "{{ item[0].owner }}"
+    group: "{{ item[0].owner }}"
   with_nested:
-    - paths
-    - matplotlibrclines
+    - "{{ paths }}"
+    - "{{ matplotlibrclines }}"
 
 - name: set up matplotlibrc
   become: true
   lineinfile:
-    dest: "{{ item }}/.config/matplotlib/matplotlibrc"
+    dest: "{{ item[0].path }}/.config/matplotlib/matplotlibrc"
     line: "backend: agg"
+    owner: "{{ item[0].owner }}"
+    group: "{{ item[0].owner }}"
   with_items: "{{ paths }}"
 
 - name: set up ssh (general)
@@ -49,3 +55,34 @@
     password: "{{ ssh_password }}"
     shell: /bin/bash
     groups: sudo
+
+- name: set up login screens
+  become: true
+  lineinfile:
+    dest: "{{ item.dest }}"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { dest: '/etc/update-motd.d/00-header', regexp: '^printf "Welcome to.*$', line: 'Welcome to QIIME 2 Core 2.0.6!' }
+    - { dest: '/etc/update-motd.d/10-help-text', regexp: '^.*Documentation.*$', line: 'Documentation: https://docs.qiime2.org/\n' }
+    - { dest: '/etc/update-motd.d/10-help-text', regexp: '^.*Support.*$', line: 'Support: https://forum.qiime2.org/\n' }
+    - { dest: '/etc/update-motd.d/10-help-text', regexp: '^.*Management.*$', line: '' }
+    - { dest: '/etc/update-motd.d/51-cloudguest', regexp: '^.*echo.*$', line: '' }
+
+- name: add qiime logo to splash
+  become: true
+  blockinfile:
+    dest: /etc/update-motd.d/00-header
+    insertafter: EOF
+    block: |
+   ___      _____  _____  ____    ____  ________    _____   
+ .'   `.   |_   _||_   _||_   \  /   _||_   __  |  / ___ `. 
+/  .-.  \    | |    | |    |   \/   |    | |_ \_| |_/___) | 
+| |   | |    | |    | |    | |\  /| |    |  _| _   .'____.' 
+\  `-'  \_  _| |_  _| |_  _| |_\/_| |_  _| |__/ | / /_____  
+ `.___.\__||_____||_____||_____||_____||________| |_______| 
+
+- name: set hostname
+  become: true
+  hostname:
+    name: "{{ hostname }}"
