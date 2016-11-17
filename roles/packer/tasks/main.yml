@@ -1,32 +1,42 @@
 ---
 # This role sets up the necessary user environments for aws and vbox
 
-- name: set up /etc/skel/.bashrc
-  become: true
-  lineinfile:
-    dest: /etc/skel/.bashrc
-    line: "{{ item }}"
-  with_items:
+vars:
+  paths:
+    - /etc/skel
+    - '~'
+  bashrclines:
     - export PATH="{{ miniconda_path }}/bin:$PATH"
     - source tab-qiime
+  matplotlibrclines:
+    - { path: '.config', state: 'directory'}
+    - { path: '.config/matplotlib', state: 'directory'}
+    - { path: '.config/matplotlib/matplotlibrc', state: 'touch' }
 
-- name: create matplotlib config dirs and ssh dir
-  become: true
-  file:
-    path: "{{ item.path }}"
-    state: "{{ item.state }}"
-  with_items:
-    - { path: '/etc/skel/.config', state: 'directory'}
-    - { path: '/etc/skel/.config/matplotlib', state: 'directory'}
-    - { path: '/etc/skel/.config/matplotlib/matplotlibrc', state: 'touch' }
-
-- name: set up /etc/skel/.config/matplotlib/matplotlibrc
+- name: set up .bashrc
   become: true
   lineinfile:
-    dest: /etc/skel/.config/matplotlib/matplotlibrc
-    line: "{{ item }}"
-  with_items:
-    - "backend: agg"
+    dest: "{{ item[0] }}/.bashrc"
+    line: "{{ item[1] }}"
+  with_nested:
+    - paths
+    - bashrclines
+
+- name: create matplotlib config dirs
+  become: true
+  file:
+    path: "{{ item[0] }}/{{ item[1].path }}"
+    state: "{{ item[1].state }}"
+  with_nested:
+    - paths
+    - matplotlibrclines
+
+- name: set up matplotlibrc
+  become: true
+  lineinfile:
+    dest: "{{ item }}/.config/matplotlib/matplotlibrc"
+    line: "backend: agg"
+  with_items: "{{ paths }}"
 
 - name: set up ssh (general)
   become: true
@@ -50,5 +60,4 @@
     name: "{{ ssh_username }}"
     password: "{{ ssh_password }}"
     shell: /bin/bash
-    group: "{{ ssh_username }}"
     groups: sudo
