@@ -3,6 +3,16 @@
 - hosts: default
   vars:
     with_users: false
+    paths:
+      - /etc/skel
+      - '~'
+    bashrclines:
+      - "export PATH={{ miniconda_path }}/bin:$PATH"
+      - source tab-qiime
+    matplotlibrclines:
+      - { path: '.config', state: 'directory'}
+      - { path: '.config/matplotlib', state: 'directory'}
+      - { path: '.config/matplotlib/matplotlibrc', state: 'touch' }
   roles:
     - { role: ../roles/packer, when: with_users | match("true") }
     - ../roles/qiime2

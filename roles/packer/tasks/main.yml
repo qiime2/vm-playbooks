@@ -1,18 +1,6 @@
 ---
 # This role sets up the necessary user environments for aws and vbox
 
-vars:
-  paths:
-    - /etc/skel
-    - '~'
-  bashrclines:
-    - export PATH="{{ miniconda_path }}/bin:$PATH"
-    - source tab-qiime
-  matplotlibrclines:
-    - { path: '.config', state: 'directory'}
-    - { path: '.config/matplotlib', state: 'directory'}
-    - { path: '.config/matplotlib/matplotlibrc', state: 'touch' }
-
 - name: set up .bashrc
   become: true
   lineinfile:
