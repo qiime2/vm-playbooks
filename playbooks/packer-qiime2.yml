@@ -8,7 +8,9 @@
       - { path: '/home/ubuntu', owner: 'ubuntu' }
     bashrclines:
       - "export PATH={{ miniconda_path }}/bin:$PATH"
-      - source tab-qiime
+      - "export LC_ALL=C.UTF-8"
+      - "export LANG=C.UTF-8"
+      - "source tab-qiime"
     matplotlibrclines:
       - { path: '.config', state: 'directory'}
       - { path: '.config/matplotlib', state: 'directory'}

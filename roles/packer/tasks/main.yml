@@ -26,10 +26,10 @@
 - name: set up matplotlibrc
   become: true
   lineinfile:
-    dest: "{{ item[0].path }}/.config/matplotlib/matplotlibrc"
+    dest: "{{ item.path }}/.config/matplotlib/matplotlibrc"
     line: "backend: agg"
-    owner: "{{ item[0].owner }}"
-    group: "{{ item[0].owner }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.owner }}"
   with_items: "{{ paths }}"
 
 - name: set up ssh (general)
@@ -63,17 +63,17 @@
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
   with_items:
-    - { dest: '/etc/update-motd.d/00-header', regexp: '^printf "Welcome to.*$', line: 'Welcome to QIIME 2 Core 2.0.6!' }
-    - { dest: '/etc/update-motd.d/10-help-text', regexp: '^.*Documentation.*$', line: 'Documentation: https://docs.qiime2.org/\n' }
-    - { dest: '/etc/update-motd.d/10-help-text', regexp: '^.*Support.*$', line: 'Support: https://forum.qiime2.org/\n' }
+    - { dest: '/etc/update-motd.d/00-header', regexp: '^printf "Welcome to.*$', line: 'printf "Welcome to QIIME 2 Core 2.0.6!\n\n"' }
+    - { dest: '/etc/update-motd.d/10-help-text', regexp: '^.*Documentation.*$', line: 'printf "  * Documentation: https://docs.qiime2.org/\n"' }
+    - { dest: '/etc/update-motd.d/10-help-text', regexp: '^.*Support.*$', line: 'printf "  * Support: https://forum.qiime2.org/\n"' }
     - { dest: '/etc/update-motd.d/10-help-text', regexp: '^.*Management.*$', line: '' }
-    - { dest: '/etc/update-motd.d/51-cloudguest', regexp: '^.*echo.*$', line: '' }
 
 - name: add qiime logo to splash
   become: true
   blockinfile:
     dest: /etc/update-motd.d/00-header
     block: |
+      cat<<"EOF"
       +-------------------------------------------------------------+
       |    ___      _____  _____  ____    ____  ________    _____   |
       |  .'   `.   |_   _||_   _||_   \  /   _||_   __  |  / ___ `. |
@@ -83,6 +83,7 @@
       |  `.___.\__||_____||_____||_____||_____||________| |_______| |
       |                                                             |
       +-------------------------------------------------------------+
+      EOF
 
 - name: set hostname
   become: true

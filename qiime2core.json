@@ -3,15 +3,16 @@
     "ssh_username": "qiime2",
     "ssh_password": "qiime2",
     "ssh_pass_hash": "$6$rounds=656000$6FQ3UxCZ5wxhLdjh$N7Savir8YpAG3gURfDK5v8cTX9w3odqVaaodKZ/.h3W76eYZob6DlOlypMkskIMM/23ezHYhQLuEvDN6.L/v2.",
-    "ssh_fullname": "QIIME 2 User"
+    "ssh_fullname": "QIIME 2 User",
+    "miniconda_path": "/miniconda3"
   },
 
   "provisioners": [
     {
       "type": "shell",
       "inline": [
-        "echo 'export PATH=/miniconda3/bin:$PATH' | tee -a ~/.bashrc ~/.profile /etc/profile",
-        "echo 'export PATH=/miniconda3/bin:$PATH' | tee /etc/environment /etc/profile.d/conda.sh",
+        "echo 'export PATH={{ user `miniconda_path` }}/bin:$PATH' | tee -a ~/.bashrc ~/.profile /etc/profile",
+        "echo 'export PATH={{ user `miniconda_path` }}/bin:$PATH' | tee /etc/environment /etc/profile.d/conda.sh",
         "echo 'export LC_ALL=C.UTF-8' | tee -a ~/.bashrc ~/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh",
         "echo 'export LANG=C.UTF-8' | tee -a ~/.bashrc ~/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh",
         "mkdir -p ~/.config/matplotlib",
@@ -35,7 +36,7 @@
       "playbook_file": "./playbooks/packer-qiime2.yml",
       "inventory_groups": "default",
       "extra_arguments": [
-        "--extra-vars 'miniconda_path=/miniconda3 hostname={{ user `hostname` }} with_users=true ssh_username={{ user `ssh_username` }} ssh_password={{ user `ssh_pass_hash` }}'"
+        "--extra-vars 'miniconda_path={{ user `miniconda_path` }} hostname={{ user `hostname` }} with_users=true ssh_username={{ user `ssh_username` }} ssh_password={{ user `ssh_pass_hash` }}'"
       ],
       "role_paths": [
         "./roles/packer",
@@ -47,13 +48,16 @@
       "type": "ansible-local",
       "playbook_file": "./playbooks/packer-qiime2.yml",
       "inventory_groups": "default",
-      "extra_arguments": ["--extra-vars 'miniconda_path=/miniconda3 hostname={{ user `hostname` }}'"],
+      "extra_arguments": ["--extra-vars 'miniconda_path={{ user `miniconda_path` }} hostname={{ user `hostname` }}'"],
       "role_paths": ["./roles/qiime2"],
       "only": ["docker"]
     },
     {
       "type": "shell",
-      "inline": ["rm -rf ~/.bash_history ~/.ansible"]
+      "inline": [
+        "rm -rf ~/.bash_history ~/.ansible",
+        "{{ user `miniconda_path` }}/bin/qiime dev refresh-cache"
+      ]
     }
   ],
 
