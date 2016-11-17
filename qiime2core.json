@@ -78,7 +78,7 @@
       "iso_checksum_type": "md5",
       "http_directory" : "http",
       "disk_size" : 10000,
-      "ssh_wait_timeout": "20m",
+      "ssh_wait_timeout": "60m",
       "ssh_username": "{{ user `ssh_username` }}",
       "ssh_password": "{{ user `ssh_password` }}",
       "shutdown_command": "echo {{user `ssh_password`}} | sudo -S shutdown -P now",
