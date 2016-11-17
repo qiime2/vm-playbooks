@@ -48,8 +48,11 @@
       "type": "ansible-local",
       "playbook_file": "./playbooks/packer-qiime2.yml",
       "inventory_groups": "default",
-      "extra_arguments": ["--extra-vars 'miniconda_path={{ user `miniconda_path` }} hostname={{ user `hostname` }}'"],
-      "role_paths": ["./roles/qiime2"],
+      "extra_arguments": ["--extra-vars 'miniconda_path={{ user `miniconda_path` }} hostname={{ user `hostname` }}' with_users=false"],
+      "role_paths": [
+        "./roles/packer",
+        "./roles/qiime2"
+      ],
       "only": ["docker"]
     },
     {
