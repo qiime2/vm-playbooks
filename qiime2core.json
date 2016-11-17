@@ -68,7 +68,8 @@
     {
       "type": "virtualbox-iso",
       "guest_os_type": "Ubuntu_64",
-      "vm_name": "QIIME 2 Core - {{ user `core_version` }}",
+      "vm_name": "QIIME 2 Core - {{ core_version }}",
+      "headless": true,
       "iso_urls": [
         "./iso/ubuntu-16.04.1-server-amd64.iso",
         "http://releases.ubuntu.com/16.04/ubuntu-16.04.1-server-amd64.iso"
@@ -112,7 +113,7 @@
       "instance_type": "m1.small",
       "region": "us-west-2",
       "source_ami": "ami-13e24f73",
-      "ami_name": "qiime2 {{ timestamp }}",
+      "ami_name": "{{ user `hostname`}} {{ timestamp }}",
       "ssh_username": "ubuntu"
     }
   ],
