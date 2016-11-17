@@ -1,0 +1,48 @@
+---
+# This role sets up the necessary user environments for aws and vbox
+
+- name: set up /etc/skel/.bashrc
+  lineinfile:
+    dest: /etc/skel/.bashrc
+    line: "{{ item }}"
+  with_items:
+    - export PATH="{{ miniconda_path }}/bin:$PATH"
+    - source tab-qiime
+
+- name: create matplotlib config dirs and ssh dir
+  file:
+    path: "{{ item.path }}"
+    state: "{{ item.state }}"
+  with_items:
+    - { path: '/etc/skel/.config', state: 'directory'}
+    - { path: '/etc/skel/.config/matplotlib', state: 'directory'}
+    - { path: '/etc/skel/.config/matplotlib/matplotlibrc', state: 'touch' }
+
+- name: set up /etc/skel/.config/matplotlib/matplotlibrc
+  lineinfile:
+    dest: /etc/skel/.config/matplotlib/matplotlibrc
+    line: "{{ item }}"
+  with_items:
+    - "backend: agg"
+
+- name: set up ssh (general)
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { regexp: '^PasswordAuthentication.*$', line: 'PasswordAuthentication yes' }
+    - { regexp: '^.*Port.*$', line: 'Port 22' }
+
+- name: restart ssh
+  service:
+    name: ssh
+    state: restarted
+
+- name: create user account
+  user:
+    name: "{{ ssh_username }}"
+    password: "{{ ssh_password }}"
+    shell: /bin/bash
+    group: "{{ ssh_username }}"
+    groups: sudo

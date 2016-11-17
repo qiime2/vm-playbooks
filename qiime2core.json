@@ -2,6 +2,7 @@
   "variables": {
     "ssh_username": "qiime2",
     "ssh_password": "qiime2",
+    "ssh_pass_hash": "$6$rounds=656000$6FQ3UxCZ5wxhLdjh$N7Savir8YpAG3gURfDK5v8cTX9w3odqVaaodKZ/.h3W76eYZob6DlOlypMkskIMM/23ezHYhQLuEvDN6.L/v2.",
     "ssh_fullname": "QIIME 2 User"
   },
 
@@ -13,6 +14,8 @@
         "echo 'export PATH=/miniconda3/bin:$PATH' | tee /etc/environment /etc/profile.d/conda.sh",
         "echo 'export LC_ALL=C.UTF-8' | tee -a ~/.bashrc ~/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh",
         "echo 'export LANG=C.UTF-8' | tee -a ~/.bashrc ~/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh",
+        "mkdir -p ~/.config/matplotlib",
+        "echo 'backend: agg'> ~/.config/matplotlib/matplotlibrc",
         "pip install -U ansible"
       ],
       "only": ["docker"]
@@ -23,33 +26,34 @@
         "sudo apt -y install software-properties-common",
         "sudo apt-add-repository ppa:ansible/ansible",
         "sudo apt -y update",
-        "sudo apt -y install ansible",
-        "sudo useradd {{ user `ssh_username` }} -s /bin/bash -m",
-        "sudo usermod -aG sudo {{ user `ssh_username` }}",
-        "echo '{{ user `ssh_username` }}:{{ user `ssh_password` }}' | sudo chpasswd",
-        "echo 'export PATH=/miniconda3/bin:$PATH' | sudo tee -a /home/ubuntu/.bashrc /home/ubuntu/.profile /home/{{ user `ssh_username` }}/.bashrc /home/{{ user `ssh_username` }}/.profile",
-        "sudo mkdir -p /home/{{ user `ssh_username` }}/.config/matplotlib",
-        "echo 'backend: agg' sudo tee /home/{{ user `ssh_username` }}/.config/matplotlib/matplotlibrc"
+        "sudo apt -y install ansible"
       ],
       "only": ["virtualbox-iso", "amazon-ebs"]
     },
     {
-      "type": "shell",
-      "inline": [
-        "mkdir -p ~/.config/matplotlib",
-        "echo 'backend: agg'> ~/.config/matplotlib/matplotlibrc"
-      ]
+      "type": "ansible-local",
+      "playbook_file": "./playbooks/packer-qiime2.yml",
+      "inventory_groups": "default",
+      "extra_arguments": [
+        "--extra-vars 'miniconda_path=/miniconda3 with_users=true ssh_username={{ user `ssh_username` }} ssh_password={{ user `ssh_pass_hash` }}'"
+      ],
+      "role_paths": [
+        "./roles/packer",
+        "./roles/qiime2"
+      ],
+      "only": ["virtualbox-iso", "amazon-ebs"]
     },
     {
       "type": "ansible-local",
       "playbook_file": "./playbooks/packer-qiime2.yml",
       "inventory_groups": "default",
       "extra_arguments": ["--extra-vars \"miniconda_path=/miniconda3\""],
-      "role_paths": ["./roles/qiime2"]
+      "role_paths": ["./roles/qiime2"],
+      "only": ["docker"]
     },
     {
       "type": "shell",
-      "inline": ["rm -rf ~/.bash_history ~/.ansible"]
+      "inline": ["rm -rf ~/.bash_history ~/.ansible /tmp/*"]
     }
   ],
 
