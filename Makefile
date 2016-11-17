@@ -1,5 +1,5 @@
 CORE_VERSION := 2.0.6
-HOSTNAME := "qiime2core2-0-6"
+HOSTNAME := qiime2core2-0-6
 
 .PHONY: help
 help:
