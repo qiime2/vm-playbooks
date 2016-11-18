@@ -35,5 +35,4 @@ virtualbox:
 		-only=virtualbox-iso \
 		-var 'core_version=$(CORE_VERSION)' \
 		-var 'hostname=$(HOSTNAME)' \
-		-on-error abort \
 		qiime2core.json

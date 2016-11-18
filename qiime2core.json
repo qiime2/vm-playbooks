@@ -48,7 +48,7 @@
       "type": "ansible-local",
       "playbook_file": "./playbooks/packer-qiime2.yml",
       "inventory_groups": "default",
-      "extra_arguments": ["--extra-vars 'miniconda_path={{ user `miniconda_path` }} hostname={{ user `hostname` }}' with_users=false"],
+      "extra_arguments": ["--extra-vars 'miniconda_path={{ user `miniconda_path` }} hostname={{ user `hostname` }} with_users=false'"],
       "role_paths": [
         "./roles/packer",
         "./roles/qiime2"
@@ -81,6 +81,10 @@
       "ssh_wait_timeout": "360m",
       "ssh_username": "ubuntu",
       "ssh_password": "ubuntu",
+      "vboxmanage": [
+        ["modifyvm", "{{ .Name }}", "--memory", "2048"],
+        ["modifyvm", "{{ .Name }}", "--cpus", "2"]
+      ],
       "shutdown_command": "echo {{user `ssh_password`}} | sudo -S shutdown -P now",
       "boot_command" : [
         "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
