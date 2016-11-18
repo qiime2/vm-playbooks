@@ -69,7 +69,7 @@
       "type": "virtualbox-iso",
       "guest_os_type": "Ubuntu_64",
       "vm_name": "QIIME 2 Core - {{ user `core_version` }}",
-      "headless": true,
+      "headless": false,
       "iso_urls": [
         "./iso/ubuntu-16.04.1-server-amd64.iso",
         "http://releases.ubuntu.com/16.04/ubuntu-16.04.1-server-amd64.iso"
@@ -79,8 +79,8 @@
       "http_directory" : "http",
       "disk_size" : 10000,
       "ssh_wait_timeout": "360m",
-      "ssh_username": "{{ user `ssh_username` }}",
-      "ssh_password": "{{ user `ssh_password` }}",
+      "ssh_username": "ubuntu",
+      "ssh_password": "ubuntu",
       "shutdown_command": "echo {{user `ssh_password`}} | sudo -S shutdown -P now",
       "boot_command" : [
         "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",

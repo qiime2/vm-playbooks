@@ -10,7 +10,7 @@ help:
 
 .PHONY: docker
 docker:
-	packer build --only=docker qiime2core.json
+	packer build -only=docker qiime2core.json
 	docker run -i -t -d --name q2 qiime2/core:latest /bin/bash
 	docker commit \
 		-c 'ENV PATH=/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
@@ -24,7 +24,7 @@ docker:
 .PHONY: aws
 aws:
 	packer build \
-		--only=amazon-ebs \
+		-only=amazon-ebs \
 		-var 'core_version=$(CORE_VERSION)' \
 		-var 'hostname=$(HOSTNAME)' \
 		qiime2core.json
@@ -32,7 +32,8 @@ aws:
 .PHONY: virtualbox
 virtualbox:
 	packer build \
-		--only=virtualbox-iso \
+		-only=virtualbox-iso \
 		-var 'core_version=$(CORE_VERSION)' \
 		-var 'hostname=$(HOSTNAME)' \
+		-on-error abort \
 		qiime2core.json
