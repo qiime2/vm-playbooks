@@ -1,0 +1,138 @@
+{
+  "variables": {
+    "ssh_username": "qiime2",
+    "ssh_password": "qiime2",
+    "ssh_pass_hash": "$6$rounds=656000$6FQ3UxCZ5wxhLdjh$N7Savir8YpAG3gURfDK5v8cTX9w3odqVaaodKZ/.h3W76eYZob6DlOlypMkskIMM/23ezHYhQLuEvDN6.L/v2.",
+    "ssh_fullname": "QIIME 2 User",
+    "miniconda_path": "/miniconda3"
+  },
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "echo 'export PATH={{ user `miniconda_path` }}/bin:$PATH' | tee -a ~/.bashrc ~/.profile /etc/profile",
+        "echo 'export PATH={{ user `miniconda_path` }}/bin:$PATH' | tee /etc/environment /etc/profile.d/conda.sh",
+        "echo 'export LC_ALL=C.UTF-8' | tee -a ~/.bashrc ~/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh",
+        "echo 'export LANG=C.UTF-8' | tee -a ~/.bashrc ~/.profile /etc/profile /etc/environment /etc/profile.d/conda.sh",
+        "mkdir -p ~/.config/matplotlib",
+        "echo 'backend: agg'> ~/.config/matplotlib/matplotlibrc",
+        "pip install -U ansible"
+      ],
+      "only": ["docker"]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo apt -y install software-properties-common",
+        "sudo apt-add-repository ppa:ansible/ansible",
+        "sudo apt -y update",
+        "sudo apt -y install ansible"
+      ],
+      "only": ["virtualbox-iso", "amazon-ebs"]
+    },
+    {
+      "type": "ansible-local",
+      "playbook_file": "./playbooks/packer-qiime2.yml",
+      "inventory_groups": "default",
+      "extra_arguments": [
+        "--extra-vars 'miniconda_path={{ user `miniconda_path` }} hostname={{ user `hostname` }} with_users=true ssh_username={{ user `ssh_username` }} ssh_password={{ user `ssh_pass_hash` }}'"
+      ],
+      "role_paths": [
+        "./roles/packer",
+        "./roles/qiime2"
+      ],
+      "only": ["virtualbox-iso", "amazon-ebs"]
+    },
+    {
+      "type": "ansible-local",
+      "playbook_file": "./playbooks/packer-qiime2.yml",
+      "inventory_groups": "default",
+      "extra_arguments": ["--extra-vars 'miniconda_path={{ user `miniconda_path` }} hostname={{ user `hostname` }} with_users=false'"],
+      "role_paths": [
+        "./roles/packer",
+        "./roles/qiime2"
+      ],
+      "only": ["docker"]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "rm -rf ~/.bash_history ~/.ansible",
+        "{{ user `miniconda_path` }}/bin/qiime dev refresh-cache"
+      ]
+    }
+  ],
+
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "guest_os_type": "Ubuntu_64",
+      "vm_name": "QIIME 2 Core - {{ user `core_version` }} ({{ timestamp }})",
+      "headless": false,
+      "iso_urls": [
+        "./iso/ubuntu-16.04.1-server-amd64.iso",
+        "http://releases.ubuntu.com/16.04/ubuntu-16.04.1-server-amd64.iso"
+      ],
+      "iso_checksum": "d2d939ca0e65816790375f6826e4032f",
+      "iso_checksum_type": "md5",
+      "http_directory" : "http",
+      "disk_size" : 10000,
+      "ssh_wait_timeout": "360m",
+      "ssh_username": "ubuntu",
+      "ssh_password": "ubuntu",
+      "vboxmanage": [
+        ["modifyvm", "{{ .Name }}", "--memory", "2048"],
+        ["modifyvm", "{{ .Name }}", "--cpus", "2"]
+      ],
+      "shutdown_command": "echo {{user `ssh_password`}} | sudo -S shutdown -P now",
+      "boot_command" : [
+        "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs>",
+        "/install/vmlinuz noapic<wait>",
+        " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg<wait>",
+        " auto<wait>",
+        " hostname={{ user `hostname` }}<wait>",
+        " fb=false<wait>",
+        " debconf/frontend=noninteractive<wait>",
+        " debian-installer=en_US<wait>",
+        " locale=en_US.UTF-8<wait>",
+        " passwd/user-fullname=ubuntu<wait>",
+        " passwd/username=ubuntu<wait>",
+        " passwd/user-password=ubuntu<wait>",
+        " passwd/user-password-again=ubuntu<wait>",
+        " console-setup/ask_detect=false<wait>",
+        " keyboard-configuration/variant=USA<wait>",
+        " keyboard-configuration/layout=USA<wait>",
+        " kbd-chooser/method=us<wait>",
+        " initrd=/install/initrd.gz --- <enter><wait>"
+      ]
+    },
+    {
+      "type": "docker",
+      "image": "python:3.5",
+      "commit": "true"
+    },
+    {
+      "type": "amazon-ebs",
+      "instance_type": "m1.small",
+      "region": "us-west-2",
+      "source_ami": "ami-13e24f73",
+      "ami_name": "QIIME 2 Core - {{ user `core_version` }} ({{ timestamp }})",
+      "ssh_username": "ubuntu"
+    }
+  ],
+
+  "post-processors": [
+    {
+      "type": "docker-tag",
+      "repository": "qiime2/core",
+      "tag": "latest",
+      "only": ["docker"]
+    }
+  ]
+}

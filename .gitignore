@@ -3,4 +3,9 @@ venv
 .DS_Store
 *.pem
 *.csv
-*.json
+tmp/*
+!tmp/.gitkeep
+iso/*
+!iso/.gitkeep
+output-virtualbox-iso
+packer_cache
