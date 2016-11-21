@@ -4,9 +4,11 @@ HOSTNAME := qiime2core2-0-6
 .PHONY: help
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
-	@echo "  docker      to a Docker image"
-	@echo "  aws         to build an AWS image"
-	@echo "  virtualbox  to build a Virtualbox image"
+	@echo "  docker            to build a Docker image"
+	@echo "  aws               to build an AWS image"
+	@echo "  virtualbox        to build a Virtualbox image"
+	@echo "  workshop-deploy   to build and deploy a workshop cluster"
+	@echo "  workshop-destroy  to tear down a workshop cluster"
 
 .PHONY: docker
 docker:
@@ -36,3 +38,11 @@ virtualbox:
 		-var 'core_version=$(CORE_VERSION)' \
 		-var 'hostname=$(HOSTNAME)' \
 		qiime2core.json
+
+.PHONY: workshop-deploy
+workshop-deploy:
+	ansible-playbook -i inventory playbooks/aws-workshop-allocate.yml
+
+.PHONY: workshop-destroy
+workshop-destroy:
+	ansible-playbook -i inventory playbooks/aws-workshop-destroy.yml

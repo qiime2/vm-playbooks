@@ -73,11 +73,11 @@ $ export QIIME_SSL_EMAIL='example@example.org'
 ### Allocate infrastructure
 
 ```bash
-$ ansible-playbook -i inventory playbooks/aws-workshop-allocate.yml
+$ make workshop-deploy
 ```
 
 ### Destroy all infrastructure (including EBS Volumes)
 
 ```bash
-$ ansible-playbook -i inventory playbooks/aws-workshop-destroy.yml
+$ make workshop-destroy
 ```
