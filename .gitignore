@@ -5,3 +5,7 @@ venv
 *.csv
 tmp/*
 !tmp/.gitkeep
+iso/*
+!iso/.gitkeep
+output-virtualbox-iso
+packer_cache
