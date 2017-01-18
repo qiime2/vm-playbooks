@@ -48,13 +48,19 @@
     name: ssh
     state: restarted
 
+- name: create vboxsf group
+  become: true
+  group:
+    name: vboxsf
+    state: present
+
 - name: create user account
   become: true
   user:
     name: "{{ ssh_username }}"
     password: "{{ ssh_password }}"
     shell: /bin/bash
-    groups: sudo
+    groups: sudo,vboxsf
 
 - name: set up login screens
   become: true

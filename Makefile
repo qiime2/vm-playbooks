@@ -37,6 +37,7 @@ virtualbox:
 		-only=virtualbox-iso \
 		-var 'core_version=$(CORE_VERSION)' \
 		-var 'hostname=$(HOSTNAME)' \
+		-on-error=ask \
 		qiime2core.json
 
 .PHONY: workshop-deploy

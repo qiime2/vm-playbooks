@@ -77,13 +77,15 @@
       "iso_checksum": "d2d939ca0e65816790375f6826e4032f",
       "iso_checksum_type": "md5",
       "http_directory" : "http",
-      "disk_size" : 10000,
+      "disk_size" : 1000000,
       "ssh_wait_timeout": "360m",
       "ssh_username": "ubuntu",
       "ssh_password": "ubuntu",
+      "guest_additions_mode": "attach",
       "vboxmanage": [
         ["modifyvm", "{{ .Name }}", "--memory", "2048"],
-        ["modifyvm", "{{ .Name }}", "--cpus", "2"]
+        ["modifyvm", "{{ .Name }}", "--cpus", "2"],
+        ["modifyvm", "{{ .Name }}", "--vram", "256"]
       ],
       "shutdown_command": "echo {{user `ssh_password`}} | sudo -S shutdown -P now",
       "boot_command" : [
