@@ -33,5 +33,6 @@
     - conda install --override-channels -c biocore -c defaults fasttree -y
     - conda install --override-channels -c qiime2 -c defaults q2-demux q2-alignment q2-phylogeny q2-composition q2-taxa q2-feature-classifier -y
     - conda install --override-channels -c r -c defaults r -y
+    - conda install --override-channels -c r -c defaults 'r-base=3.3.1 1' -y
     - conda install --override-channels -c bioconda -c defaults bioconductor-dada2 mafft -y
     - conda install --override-channels -c qiime2 -c defaults q2-dada2 -y
