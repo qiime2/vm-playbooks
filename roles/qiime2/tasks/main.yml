@@ -25,10 +25,14 @@
     PATH: "{{ miniconda_path }}/bin:$PATH"
   command: "{{ item }}"
   with_items:
-    - conda install matplotlib==1.5.1 -y
-    - conda install -c biocore fasttree -y
-    - conda install -c bioconda -c r bioconductor-dada2 mafft -y
-    - conda install -c qiime2 qiime q2cli q2-types q2-feature-table -y
-    - conda install -c qiime2 -c conda-forge q2-diversity q2-emperor -y
-    - conda install -c qiime2 q2-alignment q2-phylogeny q2-dada2 q2-demux -y
-    - conda install -c qiime2 q2-composition q2-feature-classifier q2-taxa -y
+    - conda install --override-channels -c qiime2 -c defaults qiime q2cli -y
+    - conda install --override-channels -c defaults matplotlib==1.5.1 -y
+    - conda install --override-channels -c qiime2 -c defaults q2-types q2-feature-table -y
+    - conda install --override-channels -c qiime2 -c conda-forge -c defaults q2-diversity q2-emperor -y
+    - conda install --override-channels -c bioconda -c defaults mafft -y
+    - conda install --override-channels -c biocore -c defaults fasttree -y
+    - conda install --override-channels -c qiime2 -c defaults q2-demux q2-alignment q2-phylogeny q2-composition q2-taxa q2-feature-classifier -y
+    - conda install --override-channels -c r -c defaults r -y
+    - conda install --override-channels -c r -c defaults 'r-base=3.3.1 1' -y
+    - conda install --override-channels -c bioconda -c defaults bioconductor-dada2 mafft -y
+    - conda install --override-channels -c qiime2 -c defaults q2-dada2 -y
