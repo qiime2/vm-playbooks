@@ -12,7 +12,10 @@ help:
 
 .PHONY: docker
 docker:
-	packer build -only=docker qiime2core.json
+	packer build \
+		-only=docker \
+		-var-file=variables.json \
+		qiime2core.json
 	docker run -i -t -d --name q2 qiime2/core:latest /bin/bash
 	docker commit \
 		-c 'ENV PATH=/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
@@ -27,6 +30,7 @@ docker:
 aws:
 	packer build \
 		-only=amazon-ebs \
+		-var-file=variables.json \
 		-var 'core_version=$(CORE_VERSION)' \
 		-var 'hostname=$(HOSTNAME)' \
 		qiime2core.json
@@ -35,10 +39,19 @@ aws:
 virtualbox:
 	packer build \
 		-only=virtualbox-iso \
+		-var-file=variables.json \
 		-var 'core_version=$(CORE_VERSION)' \
 		-var 'hostname=$(HOSTNAME)' \
 		-on-error=ask \
 		qiime2core.json
+
+.PHONY: vbox-devel
+vbox-devel:
+	vagrant up
+
+.PHONY: vbox-devel-destroy
+vbox-devel-destroy:
+	vagrant destroy --force
 
 .PHONY: workshop-deploy
 workshop-deploy:
