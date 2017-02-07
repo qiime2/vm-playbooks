@@ -16,5 +16,5 @@
       - { path: '.config/matplotlib', state: 'directory'}
       - { path: '.config/matplotlib/matplotlibrc', state: 'touch' }
   roles:
-    - { role: ../roles/packer, when: with_users | match("true") }
+    - { role: ../roles/packer-setup, when: with_users | match("true") }
     - ../roles/qiime2
