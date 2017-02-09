@@ -19,20 +19,18 @@
   command: "/usr/local/src/miniconda.sh -b -p {{ miniconda_path }}"
   when: not miniconda.stat.exists
 
+- name: update miniconda
+  become: true
+  environment:
+    PATH: "{{ miniconda_path }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+  command: conda update conda -y
+
 - name: install qiime2
   become: true
   environment:
-    PATH: "{{ miniconda_path }}/bin:$PATH"
+    PATH: "{{ miniconda_path }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    CDPATH: ""
   command: "{{ item }}"
   with_items:
-    - conda install --override-channels -c qiime2 -c defaults qiime q2cli -y
-    - conda install --override-channels -c defaults matplotlib==1.5.1 -y
-    - conda install --override-channels -c qiime2 -c defaults q2-types q2-feature-table -y
-    - conda install --override-channels -c qiime2 -c conda-forge -c defaults q2-diversity q2-emperor -y
-    - conda install --override-channels -c bioconda -c defaults mafft -y
-    - conda install --override-channels -c biocore -c defaults fasttree -y
-    - conda install --override-channels -c qiime2 -c defaults q2-demux q2-alignment q2-phylogeny q2-composition q2-taxa q2-feature-classifier -y
-    - conda install --override-channels -c r -c defaults r -y
-    - conda install --override-channels -c r -c defaults 'r-base=3.3.1 1' -y
-    - conda install --override-channels -c bioconda -c defaults bioconductor-dada2 mafft -y
-    - conda install --override-channels -c qiime2 -c defaults q2-dada2 -y
+    - conda install --file https://data.qiime2.org/distro/core/qiime2-2017.2-conda-linux-64.txt
+    - R -e 'source("https://bioconductor.org/biocLite.R"); biocLite("dada2")'

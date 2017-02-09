@@ -23,7 +23,7 @@
       "playbook_file": "./playbooks/packer-qiime2.yml",
       "inventory_groups": "default",
       "extra_arguments": [
-        "--extra-vars 'miniconda_path={{ user `miniconda_path` }} hostname={{ user `hostname` }} with_users=true ssh_username={{ user `ssh_username` }} ssh_password={{ user `ssh_pass_hash` }}'"
+        "--extra-vars 'miniconda_path={{ user `miniconda_path` }} hostname={{ user `hostname` }} with_users=true ssh_username={{ user `ssh_username` }} ssh_password={{ user `ssh_pass_hash` }} core_version={{ user `core_version` }}'"
       ],
       "role_paths": [
         "./roles/packer-setup",
@@ -37,17 +37,10 @@
       "inventory_groups": "default",
       "extra_arguments": ["--extra-vars 'miniconda_path={{ user `miniconda_path` }} hostname={{ user `hostname` }} with_users=false'"],
       "role_paths": [
-        "./roles/packer",
+        "./roles/packer-setup",
         "./roles/qiime2"
       ],
       "only": ["docker"]
-    },
-    {
-      "type": "shell",
-      "inline": [
-        "rm -rf ~/.bash_history ~/.ansible",
-        "{{ user `miniconda_path` }}/bin/qiime dev refresh-cache"
-      ]
     },
     {
       "type": "ansible-local",
@@ -60,6 +53,13 @@
         "./roles/vbox-teardown"
       ],
       "only": ["virtualbox-iso"]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "rm -rf ~/.bash_history ~/.ansible",
+        "{{ user `miniconda_path` }}/bin/qiime dev refresh-cache"
+      ]
     }
   ],
 

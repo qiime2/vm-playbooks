@@ -15,7 +15,7 @@
   become_user: qiime2
   become_method: sudo
   environment:
-    PATH: "/miniconda3/bin:$PATH"
+    PATH: "/miniconda3/bin"
   command: "qiime dev refresh-cache"
 
 - name: remove sudo banner warning
