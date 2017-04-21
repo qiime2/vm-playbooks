@@ -32,5 +32,4 @@
     CDPATH: ""
   command: "{{ item }}"
   with_items:
-    - conda install --file https://data.qiime2.org/distro/core/qiime2-2017.2-conda-linux-64.txt
-    - R -e 'source("https://bioconductor.org/biocLite.R"); biocLite("dada2")'
+    - conda install --file https://data.qiime2.org/distro/core/qiime2-2017.4-conda-linux-64.txt

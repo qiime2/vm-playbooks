@@ -1,5 +1,5 @@
-CORE_VERSION := 2017.2
-HOSTNAME := qiime2core2017-2
+CORE_VERSION := 2017.4
+HOSTNAME := qiime2core2017-4
 
 .PHONY: help
 help:
