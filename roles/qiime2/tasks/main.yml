@@ -32,4 +32,4 @@
     CDPATH: ""
   command: "{{ item }}"
   with_items:
-    - conda install --file https://data.qiime2.org/distro/core/qiime2-2017.4-conda-linux-64.txt
+    - conda install --file https://raw.githubusercontent.com/qiime2/environment-files/master/2017.4/release/qiime2-2017.4-conda-linux-64.txt
