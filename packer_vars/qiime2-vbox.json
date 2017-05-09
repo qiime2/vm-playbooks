@@ -1,0 +1,28 @@
+{
+  "provisioners": [
+    {
+      "type": "shell",
+      "scripts": [
+        "./bin/bootstrap_ubuntu.sh",
+        "./bin/teardown_vbox.sh"
+      ],
+      "environment_vars": [
+        "QIIME2_RELEASE={{ user `QIIME2_RELEASE` }}",
+        "HOSTNAME={{ user `HOSTNAME` }}"
+      ]
+    }
+  ],
+
+  "builders": [
+    {
+      "type": "virtualbox-ovf",
+      "headless": false,
+      "source_path": "output-virtualbox-iso/QIIME_2_BASE_IMAGE.ovf",
+      "vm_name": "QIIME 2 Core - {{ user `QIIME2_RELEASE` }} ({{ timestamp }})",
+      "ssh_username": "ubuntu",
+      "ssh_password": "ubuntu",
+      "shutdown_command": "echo ubuntu | sudo -S shutdown -P now",
+      "guest_additions_mode": "upload"
+    }
+  ]
+}

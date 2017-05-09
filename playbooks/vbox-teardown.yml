@@ -1,6 +1,0 @@
----
-
-- hosts: default
-  vars:
-  roles:
-    - ../roles/vbox-teardown

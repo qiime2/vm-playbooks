@@ -1,0 +1,51 @@
+{
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "guest_os_type": "Ubuntu_64",
+      "vm_name": "QIIME_2_BASE_IMAGE",
+      "headless": false,
+      "iso_urls": [
+        "http://releases.ubuntu.com/16.04/ubuntu-16.04.2-server-amd64.iso"
+      ],
+      "iso_checksum": "2bce60d18248df9980612619ff0b34e6",
+      "iso_checksum_type": "md5",
+      "http_directory" : "http",
+      "disk_size" : 1000000,
+      "ssh_wait_timeout": "360m",
+      "ssh_username": "ubuntu",
+      "ssh_password": "ubuntu",
+      "vboxmanage": [
+        ["modifyvm", "{{ .Name }}", "--memory", "2048"],
+        ["modifyvm", "{{ .Name }}", "--cpus", "2"],
+        ["modifyvm", "{{ .Name }}", "--vram", "256"]
+      ],
+      "shutdown_command": "echo ubuntu | sudo -S shutdown -P now",
+      "boot_command" : [
+        "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs>",
+        "/install/vmlinuz noapic<wait>",
+        " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg<wait>",
+        " auto<wait>",
+        " hostname={{ user `HOSTNAME` }}<wait>",
+        " fb=false<wait>",
+        " debconf/frontend=noninteractive<wait>",
+        " debian-installer=en_US<wait>",
+        " locale=en_US.UTF-8<wait>",
+        " passwd/user-fullname=ubuntu<wait>",
+        " passwd/username=ubuntu<wait>",
+        " passwd/user-password=ubuntu<wait>",
+        " passwd/user-password-again=ubuntu<wait>",
+        " console-setup/ask_detect=false<wait>",
+        " keyboard-configuration/variant=USA<wait>",
+        " keyboard-configuration/layout=USA<wait>",
+        " kbd-chooser/method=us<wait>",
+        " initrd=/install/initrd.gz --- <enter><wait>"
+      ]
+    }
+  ]
+}

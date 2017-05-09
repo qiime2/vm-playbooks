@@ -1,7 +1,0 @@
-{
-  "ssh_username": "qiime2",
-  "ssh_password": "qiime2",
-  "ssh_pass_hash": "$6$rounds=656000$6FQ3UxCZ5wxhLdjh$N7Savir8YpAG3gURfDK5v8cTX9w3odqVaaodKZ/.h3W76eYZob6DlOlypMkskIMM/23ezHYhQLuEvDN6.L/v2.",
-  "ssh_fullname": "QIIME 2 User",
-  "miniconda_path": "/miniconda3"
-}

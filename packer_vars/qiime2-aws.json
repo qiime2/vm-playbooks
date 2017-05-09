@@ -1,0 +1,26 @@
+{
+  "provisioners": [
+    {
+      "type": "shell",
+      "scripts": [
+        "./bin/bootstrap_ubuntu.sh",
+        "./bin/teardown_aws.sh"
+      ],
+      "environment_vars": [
+        "QIIME2_RELEASE={{ user `QIIME2_RELEASE` }}",
+        "HOSTNAME={{ user `HOSTNAME` }}"
+      ]
+    }
+  ],
+
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "instance_type": "m1.small",
+      "region": "us-west-2",
+      "source_ami": "ami-a2da48c2",
+      "ami_name": "QIIME 2 Core - {{ user `QIIME2_RELEASE` }} ({{ timestamp }})",
+      "ssh_username": "ubuntu"
+    }
+  ]
+}
