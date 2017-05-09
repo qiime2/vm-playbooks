@@ -70,10 +70,10 @@
       "vm_name": "QIIME 2 Core - {{ user `core_version` }} ({{ timestamp }})",
       "headless": false,
       "iso_urls": [
-        "./iso/ubuntu-16.04.1-server-amd64.iso",
-        "http://releases.ubuntu.com/16.04/ubuntu-16.04.1-server-amd64.iso"
+        "./iso/ubuntu-16.04.2-server-amd64.iso",
+        "http://releases.ubuntu.com/16.04/ubuntu-16.04.2-server-amd64.iso"
       ],
-      "iso_checksum": "d2d939ca0e65816790375f6826e4032f",
+      "iso_checksum": "2bce60d18248df9980612619ff0b34e6",
       "iso_checksum_type": "md5",
       "http_directory" : "http",
       "disk_size" : 1000000,

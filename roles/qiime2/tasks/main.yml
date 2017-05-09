@@ -19,12 +19,6 @@
   command: "/usr/local/src/miniconda.sh -b -p {{ miniconda_path }}"
   when: not miniconda.stat.exists
 
-- name: update miniconda
-  become: true
-  environment:
-    PATH: "{{ miniconda_path }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-  command: conda update conda -y
-
 - name: install qiime2
   become: true
   environment:
@@ -32,5 +26,6 @@
     CDPATH: ""
   command: "{{ item }}"
   with_items:
-    - conda install --file https://data.qiime2.org/distro/core/qiime2-2017.2-conda-linux-64.txt
-    - R -e 'source("https://bioconductor.org/biocLite.R"); biocLite("dada2")'
+    - conda install python=3.5
+    - conda update conda -y
+    - conda install --file https://raw.githubusercontent.com/qiime2/environment-files/master/2017.4/release/qiime2-2017.4-conda-linux-64.txt
