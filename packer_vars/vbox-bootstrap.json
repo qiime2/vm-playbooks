@@ -20,6 +20,9 @@
         ["modifyvm", "{{ .Name }}", "--cpus", "2"],
         ["modifyvm", "{{ .Name }}", "--vram", "256"]
       ],
+      "vboxmanage_post": [
+        [ "storageattach", "{{ .Name }}", "--storagectl", "IDE Controller", "--port", "1", "--device", "0", "--type", "dvddrive", "--medium", "emptydrive" ]
+      ],
       "shutdown_command": "echo ubuntu | sudo -S shutdown -P now",
       "boot_command" : [
         "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
