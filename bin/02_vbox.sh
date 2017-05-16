@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Install Guest Additions
+cd /tmp
+sudo mkdir /tmp/isomount
+sudo mount -t iso9660 -o loop $HOME/VBoxGuestAdditions.iso /tmp/isomount
+sudo /tmp/isomount/VBoxLinuxAdditions.run
+sudo umount isomount
+sudo rm -rf isomount $HOME/VBoxGuestAdditions.iso
+
 # Disable user `ubuntu` from showing up in login screen
 echo -e "[User]\nSystemAccount=true" | sudo tee /var/lib/AccountsService/users/ubuntu
 
