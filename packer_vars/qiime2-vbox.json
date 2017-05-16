@@ -3,8 +3,8 @@
     {
       "type": "shell",
       "scripts": [
-        "./bin/bootstrap_ubuntu.sh",
-        "./bin/teardown_vbox.sh"
+        "./bin/01_ubuntu_common.sh",
+        "./bin/02_vbox.sh"
       ],
       "environment_vars": [
         "QIIME2_RELEASE={{ user `QIIME2_RELEASE` }}",

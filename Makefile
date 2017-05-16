@@ -23,8 +23,7 @@ vbox-bootstrap:
 		-on-error=ask \
 		packer_vars/vbox-bootstrap.json
 
-.PHONY: vbox
-vbox:
+vbox: output-virtualbox-iso/QIIME_2_BASE_IMAGE.ovf
 	packer build \
 		-var 'QIIME2_RELEASE=$(QIIME2_RELEASE)' \
 		-var 'HOSTNAME=$(HOSTNAME)' \
