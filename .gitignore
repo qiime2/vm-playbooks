@@ -8,4 +8,5 @@ tmp/*
 iso/*
 !iso/.gitkeep
 output-virtualbox-iso
+output-virtualbox-ovf
 packer_cache

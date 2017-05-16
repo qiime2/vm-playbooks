@@ -1,5 +1,0 @@
----
-# This role ensures that ansible's python dep is resolved
-
-- name: bootstrap python
-  raw: sudo apt-get install -y python
