@@ -1,6 +1,8 @@
 QIIME2_RELEASE := 2017.4
 HOSTNAME := qiime2core2017-4
 
+BOOTSTRAPPED_VBOX = output-virtualbox-iso/QIIME_2_BASE_IMAGE.ovf
+
 .PHONY: help
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -15,15 +17,17 @@ docker:
 		-t qiime2/core:$(QIIME2_RELEASE) \
 		--build-arg QIIME2_RELEASE=$(QIIME2_RELEASE) .
 
-.PHONY: vbox-bootstrap
-vbox-bootstrap:
+$(BOOTSTRAPPED_VBOX):
 	packer build \
 		-var 'QIIME2_RELEASE=$(QIIME2_RELEASE)' \
 		-var 'HOSTNAME=$(HOSTNAME)' \
 		-on-error=ask \
 		packer_vars/vbox-bootstrap.json
 
-vbox: output-virtualbox-iso/QIIME_2_BASE_IMAGE.ovf
+.PHONY: vbox-bootstrap
+vbox-bootstrap: $(BOOTSTRAPPED_VBOX)
+
+vbox: $(BOOTSTRAPPED_VBOX)
 	packer build \
 		-var 'QIIME2_RELEASE=$(QIIME2_RELEASE)' \
 		-var 'HOSTNAME=$(HOSTNAME)' \

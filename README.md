@@ -32,8 +32,6 @@ $ docker push qiime2/core
 ### Virtualbox
 
 ```bash
-# First, prep an OVF with base Ubuntu 16.04
-$ make vbox-bootstrap
 # Build the Virtualbox machine locally
 $ make vbox
 # Once done, upload the VMDK file to distribution server
