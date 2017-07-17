@@ -15,7 +15,7 @@ help:
 docker:
 	docker build \
 		-t qiime2/core:$(QIIME2_RELEASE) \
-		--build-arg QIIME2_RELEASE=$(QIIME2_RELEASE) .
+		--build-arg QIIME2_RELEASE=$(QIIME2_RELEASE) docker
 
 $(BOOTSTRAPPED_VBOX):
 	packer build \
