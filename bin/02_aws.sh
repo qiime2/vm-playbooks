@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# NOTE: We don't set up the hostname on AWS, because dynamic hostnames are
+# a thing on AWS that we don't want to mess with:
+# https://stackoverflow.com/a/12900022/313548
 sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
 sudo tee /etc/update-motd.d/00-header <<EOF

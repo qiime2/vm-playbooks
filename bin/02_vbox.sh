@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Hostname setup
+sudo hostnamectl set-hostname $HOSTNAME
+sudo hostname $HOSTNAME
+sudo sed -i 's/127.0.1.1.*/127.0.1.1\t'"$HOSTNAME"'/g' /etc/hosts
+
 # Install Guest Additions
 cd /tmp
 sudo mkdir /tmp/isomount

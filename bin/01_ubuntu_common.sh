@@ -5,8 +5,6 @@ sudo apt-get update -q -y
 sudo apt-get upgrade -y
 sudo apt-get install wget -y
 
-sudo hostnamectl set-hostname $HOSTNAME
-
 sudo groupadd vboxsf
 sudo su -c "useradd qiime2 -s /bin/bash -m -G sudo,vboxsf"
 echo qiime2:qiime2 | sudo chpasswd
