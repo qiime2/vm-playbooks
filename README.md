@@ -6,6 +6,7 @@
 
 - Packer
 - AWS Account
+- VirtualBox (latest version)
 
 ### Version Bumping
 
@@ -34,7 +35,9 @@ $ docker push qiime2/core
 ```bash
 # Build the Virtualbox machine locally
 $ make vbox
-# Once done, upload the VMDK file to distribution server
+# Once done, zip the VMDK and OVF files, and upload to distribution server.
+# Match the naming conventions of previous releases for the zip file, its
+# extracted directory, and archive members.
 ```
 
 ### Amazon AWS AMI
