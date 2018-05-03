@@ -25,10 +25,13 @@ sudo -E su -p qiime2 <<'EOF'
   wget -q https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   bash miniconda.sh -b -p $MINICONDA_PREFIX
   export PATH="$MINICONDA_PREFIX/bin:$PATH"
-  conda update -q -y conda
+  conda update -q -y -n base conda
   wget https://data.qiime2.org/distro/core/qiime2-${QIIME2_RELEASE}-py35-linux-conda.yml
   touch $HOME/.conda/environments.txt
   chown $(id -u qiime2):$(id -g qiime2) $HOME/.conda/environments.txt
+  mkdir -p $HOME/.conda/pkgs
+  touch $HOME/.conda/pkgs/urls.txt
+  chown $(id -u qiime2):$(id -g qiime2) $HOME/.conda/pkgs/urls.txt
   conda env create -n qiime2-${QIIME2_RELEASE} --file qiime2-${QIIME2_RELEASE}-py35-linux-conda.yml
   rm qiime2-${QIIME2_RELEASE}-py35-linux-conda.yml
   source activate qiime2-${QIIME2_RELEASE}
