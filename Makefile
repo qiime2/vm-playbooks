@@ -1,5 +1,5 @@
-QIIME2_RELEASE := 2018.4
-HOSTNAME := qiime2core2018-4
+QIIME2_RELEASE := 2018.6
+HOSTNAME := qiime2core2018-6
 
 BOOTSTRAPPED_VBOX = output-virtualbox-iso/QIIME_2_BASE_IMAGE.ovf
 
