@@ -5,6 +5,7 @@ ARG QIIME2_RELEASE
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 ENV MPLBACKEND agg
+ENV XDG_CONFIG_HOME /qiime2_cache
 
 RUN conda update -q -y conda
 RUN conda install -q -y wget
