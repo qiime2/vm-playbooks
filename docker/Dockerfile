@@ -7,6 +7,7 @@ ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 ENV MPLBACKEND agg
 ENV HOME /home/qiime2
+ENV XDG_CONFIG_HOME /home/qiime2
 
 RUN mkdir /home/qiime2
 WORKDIR /home/qiime2
