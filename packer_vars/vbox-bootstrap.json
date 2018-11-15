@@ -6,9 +6,9 @@
       "vm_name": "QIIME_2_BASE_IMAGE",
       "headless": false,
       "iso_urls": [
-        "http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso"
+        "http://releases.ubuntu.com/16.04/ubuntu-16.04.5-server-amd64.iso"
       ],
-      "iso_checksum": "10fcd20619dce11fe094e960c85ba4a9",
+      "iso_checksum": "24636fd103a2a43c95659f1c3c63718e",
       "iso_checksum_type": "md5",
       "http_directory" : "http",
       "disk_size" : 1000000,
