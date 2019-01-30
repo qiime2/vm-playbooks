@@ -23,3 +23,6 @@ printf "  * Support: https://forum.qiime2.org/\n"
 EOF
 
 sudo rm /etc/update-motd.d/51-cloudguest
+
+sudo apt-get update -y
+sudo apt-get upgrade -y

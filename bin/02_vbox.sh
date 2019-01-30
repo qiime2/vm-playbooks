@@ -22,7 +22,9 @@ sudo bash nodesource_setup.sh
 rm nodesource_setup.sh
 # Hack to get the hosts file to update
 sudo hostnamectl set-hostname $HOSTNAME
-sudo apt-get install -y nodejs build-essential
+sudo apt-get update -y
+sudo apt-get upgrade -y
+sudo apt-get install -y nodejs npm build-essential libgtk2.0-0 libgconf2-4
 
 # Install q2studio
 cd /opt/
@@ -51,19 +53,14 @@ EOF
 
 sudo mv /tmp/q2studio.desktop /usr/share/applications/q2studio.desktop
 
-# Install leafpad and make default GUI text editor
-sudo apt-get install leafpad -q -y
-sudo sed -i 's/text\/plain=gedit.desktop/text\/plain=leafpad.desktop/g' /usr/share/applications/defaults.list
-
 sudo su qiime2 <<'EOF'
   # Remove sudo banner warning
   touch $HOME/.sudo_as_admin_successful
 
-  # Configure unity launcher
-  dbus-launch gsettings set com.canonical.Unity.Launcher favorites \
-    "['application://gnome-terminal.desktop','application://q2studio.desktop','application://firefox.desktop','application://leafpad.desktop','application://org.gnome.Nautilus.desktop','unity://running-apps','unity://expo-icon','unity://devices']"
+  # Configure gnome launcher
+  dbus-launch dconf write /org/gnome/shell/favorite-apps "['org.gnome.Terminal.desktop','q2studio.desktop','firefox.desktop','org.gnome.gedit.desktop','org.gnome.Nautilus.desktop']"
 
-  # Disable `amazon` apps from showing up in unity
+  # Disable `amazon` apps from showing up in the DE
   mkdir -p $HOME/.local/share/applications
   cp /usr/share/applications/ubuntu-amazon-default.desktop \
     $HOME/.local/share/applications/ubuntu-amazon-default.desktop
