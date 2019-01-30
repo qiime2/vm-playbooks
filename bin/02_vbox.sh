@@ -22,7 +22,9 @@ sudo bash nodesource_setup.sh
 rm nodesource_setup.sh
 # Hack to get the hosts file to update
 sudo hostnamectl set-hostname $HOSTNAME
-sudo apt-get install -y nodejs npm build-essential
+sudo apt-get update -y
+sudo apt-get upgrade -y
+sudo apt-get install -y nodejs npm build-essential libgtk2.0-0 libgconf2-4
 
 # Install q2studio
 cd /opt/
@@ -56,7 +58,7 @@ sudo su qiime2 <<'EOF'
   touch $HOME/.sudo_as_admin_successful
 
   # Configure gnome launcher
-  dconf write /org/gnome/shell/favorite-apps "['org.gnome.Terminal.desktop','q2studio.desktop','firefox.desktop','org.gnome.gedit.desktop','org.gnome.Nautilus.desktop']"
+  dbus-launch dconf write /org/gnome/shell/favorite-apps "['org.gnome.Terminal.desktop','q2studio.desktop','firefox.desktop','org.gnome.gedit.desktop','org.gnome.Nautilus.desktop']"
 
   # Disable `amazon` apps from showing up in the DE
   mkdir -p $HOME/.local/share/applications
