@@ -9,7 +9,9 @@ sudo groupadd vboxsf
 sudo su -c "useradd qiime2 -s /bin/bash -m -G sudo,vboxsf"
 echo qiime2:qiime2 | sudo chpasswd
 
-sudo -E su -p qiime2 <<'EOF'
+sudo -E su -p -l qiime2 <<'EOF'
+  unset SUDO_UID SUDO_GID SUDO_USER
+
   export HOME=/home/qiime2
   export MINICONDA_PREFIX="$HOME/miniconda"
   export MPLBACKEND=agg
@@ -27,11 +29,6 @@ sudo -E su -p qiime2 <<'EOF'
   export PATH="$MINICONDA_PREFIX/bin:$PATH"
   conda update -q -y -n base conda
   wget https://data.qiime2.org/distro/core/qiime2-${QIIME2_RELEASE}-py36-linux-conda.yml
-  touch $HOME/.conda/environments.txt
-  chown $(id -u qiime2):$(id -g qiime2) $HOME/.conda/environments.txt
-  mkdir -p $HOME/.conda/pkgs
-  touch $HOME/.conda/pkgs/urls.txt
-  chown $(id -u qiime2):$(id -g qiime2) $HOME/.conda/pkgs/urls.txt
   conda env create -n qiime2-${QIIME2_RELEASE} --file qiime2-${QIIME2_RELEASE}-py36-linux-conda.yml
   rm qiime2-${QIIME2_RELEASE}-py36-linux-conda.yml
   source activate qiime2-${QIIME2_RELEASE}
