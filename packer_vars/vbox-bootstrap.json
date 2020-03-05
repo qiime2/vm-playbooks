@@ -7,10 +7,10 @@
       "vm_name": "QIIME_2_BASE_IMAGE",
       "headless": false,
       "iso_urls": [
-        "iso/ubuntu-18.04.2-server-amd64.iso",
-        "http://cdimage.ubuntu.com/ubuntu/releases/bionic/release/ubuntu-18.04.2-server-amd64.iso"
+        "iso/ubuntu-18.04.4-server-amd64.iso",
+        "http://cdimage.ubuntu.com/ubuntu/releases/bionic/release/ubuntu-18.04.4-server-amd64.iso"
       ],
-      "iso_checksum": "a2cb36dc010d98ad9253ea5ad5a07fd6b409e3412c48f1860536970b073c98f5",
+      "iso_checksum": "e2ecdace33c939527cbc9e8d23576381c493b071107207d2040af72595f8990b",
       "iso_checksum_type": "sha256",
       "http_directory" : "http",
       "disk_size" : 1000000,
