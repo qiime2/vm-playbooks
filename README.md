@@ -25,9 +25,9 @@ Please ensure that `QIIME2_RELEASE` is a valid release, with a published environ
 # Build the docker image locally
 $ make docker
 # After inspecting the image, login to Docker Hub:
-$ docker login
+$ docker login quay.io
 # Then push the build up:
-$ docker push qiime2/core
+$ docker push quay.io/qiime2/core
 ```
 
 ### Virtualbox
