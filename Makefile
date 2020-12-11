@@ -14,8 +14,8 @@ help:
 .PHONY: docker
 docker:
 	docker build \
-		-t qiime2/core:$(QIIME2_RELEASE) \
-		-t qiime2/core:latest \
+		-t quay.io/qiime2/core:$(QIIME2_RELEASE) \
+		-t quay.io/qiime2/core:latest \
 		--build-arg QIIME2_RELEASE=$(QIIME2_RELEASE) docker
 
 $(BOOTSTRAPPED_VBOX):
