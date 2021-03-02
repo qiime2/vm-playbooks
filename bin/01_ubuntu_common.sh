@@ -30,6 +30,7 @@ sudo -E su -p -l qiime2 <<'EOF'
   conda update -q -y -n base conda
   wget https://data.qiime2.org/distro/core/qiime2-${QIIME2_RELEASE}-py36-linux-conda.yml
   conda env create -n qiime2-${QIIME2_RELEASE} --file qiime2-${QIIME2_RELEASE}-py36-linux-conda.yml
+  conda install -n qiime2-${QIIME2_RELEASE} gevent nodejs
   rm qiime2-${QIIME2_RELEASE}-py36-linux-conda.yml
   source activate qiime2-${QIIME2_RELEASE}
   qiime dev refresh-cache
