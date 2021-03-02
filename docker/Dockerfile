@@ -14,6 +14,7 @@ WORKDIR /home/qiime2
 
 RUN conda update -q -y conda
 RUN conda install -q -y wget
+RUN apt-get install -y procps
 RUN wget https://data.qiime2.org/distro/core/qiime2-${QIIME2_RELEASE}-py36-linux-conda.yml
 RUN conda env create -n qiime2-${QIIME2_RELEASE} --file qiime2-${QIIME2_RELEASE}-py36-linux-conda.yml
 RUN rm qiime2-${QIIME2_RELEASE}-py36-linux-conda.yml
