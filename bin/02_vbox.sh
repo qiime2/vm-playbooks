@@ -24,7 +24,7 @@ sudo apt-get install -y build-essential libgtk2.0-0 libgconf2-4
 
 # Install q2studio
 
-sudo bash QIIME2_RELEASE='${QIIME2_RELEASE}' <<'EOF'
+sudo QIIME2_RELEASE=${QIIME2_RELEASE} bash <<'EOF'
   # Make sure PATH contains conda and the conda-installed npm and pip
   export PATH=/home/qiime2/miniconda/condabin:/home/qiime2/miniconda/envs/qiime2-${QIIME2_RELEASE}/bin:$PATH
   conda install -y -n qiime2-${QIIME2_RELEASE} gevent nodejs
