@@ -16,26 +16,29 @@ sudo rm -rf isomount $HOME/VBoxGuestAdditions.iso
 # Disable user `ubuntu` from showing up in login screen
 echo -e "[User]\nSystemAccount=true" | sudo tee /var/lib/AccountsService/users/ubuntu
 
-# Install nodejs
-curl -sL https://deb.nodesource.com/setup_7.x -o nodesource_setup.sh
-sudo bash nodesource_setup.sh
-rm nodesource_setup.sh
 # Hack to get the hosts file to update
 sudo hostnamectl set-hostname $HOSTNAME
 sudo apt-get update -y
 sudo apt-get upgrade -y
-sudo apt-get install -y nodejs npm build-essential libgtk2.0-0 libgconf2-4
+sudo apt-get install -y build-essential libgtk2.0-0 libgconf2-4
 
 # Install q2studio
-cd /opt/
-sudo wget -O "q2studio-${QIIME2_RELEASE}.0.zip" "https://codeload.github.com/qiime2/q2studio/zip/${QIIME2_RELEASE}.0"
-sudo unzip q2studio-${QIIME2_RELEASE}.0.zip
-sudo rm q2studio-${QIIME2_RELEASE}.0.zip
-cd q2studio-${QIIME2_RELEASE}.0
-sudo npm install
-sudo npm run build
-sudo su qiime2 -s /bin/bash -c "cd /opt/q2studio-${QIIME2_RELEASE}.0/;/home/qiime2/miniconda/envs/qiime2-${QIIME2_RELEASE}/bin/pip install ."
-sudo wget -O /usr/share/icons/hicolor/q2studio.png https://raw.githubusercontent.com/qiime2/logos/master/raster/white/qiime2-square-100.png
+
+sudo QIIME2_RELEASE=${QIIME2_RELEASE} bash <<'EOF'
+  # Make sure PATH contains conda and the conda-installed npm and pip
+  export PATH=/home/qiime2/miniconda/condabin:/home/qiime2/miniconda/envs/qiime2-${QIIME2_RELEASE}/bin:$PATH
+  conda install -y -n qiime2-${QIIME2_RELEASE} gevent nodejs
+  cd /opt/
+  wget -O "q2studio-${QIIME2_RELEASE}.0.zip" "https://codeload.github.com/qiime2/q2studio/zip/${QIIME2_RELEASE}.0"
+  unzip q2studio-${QIIME2_RELEASE}.0.zip
+  rm q2studio-${QIIME2_RELEASE}.0.zip
+  cd q2studio-${QIIME2_RELEASE}.0
+  pip install .
+  # unsafe-perm is required in order for npm to write to /opt/q2studio
+  npm install --unsafe-perm=true
+  npm run build
+  wget -O /usr/share/icons/hicolor/q2studio.png https://raw.githubusercontent.com/qiime2/logos/master/raster/white/qiime2-square-100.png
+EOF
 
 sudo cat <<EOF > /tmp/q2studio.desktop
 [Desktop Entry]
