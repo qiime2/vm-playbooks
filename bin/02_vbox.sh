@@ -28,7 +28,7 @@ sudo wget -O "q2studio-${QIIME2_RELEASE}.0.zip" "https://codeload.github.com/qii
 sudo unzip q2studio-${QIIME2_RELEASE}.0.zip
 sudo rm q2studio-${QIIME2_RELEASE}.0.zip
 cd q2studio-${QIIME2_RELEASE}.0
-/home/qiime2/miniconda/condabin/conda install -y -n qiime2-${QIIME2_RELEASE} gevent nodejs
+sudo /home/qiime2/miniconda/condabin/conda install -y -n qiime2-${QIIME2_RELEASE} gevent nodejs
 sudo su qiime2 -s /bin/bash -c "cd /opt/q2studio-${QIIME2_RELEASE}.0/;/home/qiime2/miniconda/envs/qiime2-${QIIME2_RELEASE}/bin/pip install ."
 sudo /bin/bash -c "/usr/bin/env PATH=/home/qiime2/miniconda/envs/qiime2-${QIIME2_RELEASE}/bin:$PATH npm install --unsafe-perm=true"
 sudo /bin/bash -c "/usr/bin/env PATH=/home/qiime2/miniconda/envs/qiime2-${QIIME2_RELEASE}/bin:$PATH npm run build"
