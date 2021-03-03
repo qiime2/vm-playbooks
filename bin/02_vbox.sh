@@ -28,8 +28,8 @@ sudo wget -O "q2studio-${QIIME2_RELEASE}.0.zip" "https://codeload.github.com/qii
 sudo unzip q2studio-${QIIME2_RELEASE}.0.zip
 sudo rm q2studio-${QIIME2_RELEASE}.0.zip
 cd q2studio-${QIIME2_RELEASE}.0
-sudo /home/qiime2/miniconda/envs/${QIIME2_RELEASE}/bin/npm install
-sudo /home/qiime2/miniconda/envs/${QIIME2_RELEASE}/bin/npm run build
+sudo su qiime2 -s /bin/bash -c "cd /opt/q2studio-${QIIME2_RELEASE}.0/;/home/qiime2/miniconda/envs/qiime2-${QIIME2_RELEASE}/bin/npm install"
+sudo su qiime2 -s /bin/bash -c "cd /opt/q2studio-${QIIME2_RELEASE}.0/;/home/qiime2/miniconda/envs/qiime2-${QIIME2_RELEASE}/bin/npm run build"
 sudo su qiime2 -s /bin/bash -c "cd /opt/q2studio-${QIIME2_RELEASE}.0/;/home/qiime2/miniconda/envs/qiime2-${QIIME2_RELEASE}/bin/pip install ."
 sudo wget -O /usr/share/icons/hicolor/q2studio.png https://raw.githubusercontent.com/qiime2/logos/master/raster/white/qiime2-square-100.png
 
