@@ -34,8 +34,9 @@ sudo QIIME2_RELEASE=${QIIME2_RELEASE} bash <<'EOF'
   rm q2studio-${QIIME2_RELEASE}.0.zip
   cd q2studio-${QIIME2_RELEASE}.0
   pip install .
+  npm install -g npm@7.11.2
   # unsafe-perm is required in order for npm to write to /opt/q2studio
-  npm install --unsafe-perm=true
+  npm install --unsafe-perm=true --legacy-peer-deps
   npm run build
   wget -O /usr/share/icons/hicolor/q2studio.png https://raw.githubusercontent.com/qiime2/logos/master/raster/white/qiime2-square-100.png
 EOF
