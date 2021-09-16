@@ -28,6 +28,8 @@ $ make docker
 $ docker login quay.io
 # Then push the build up:
 $ docker push quay.io/qiime2/core
+# LOGOUT
+$ docker logout quay.io
 ```
 
 ### Virtualbox
