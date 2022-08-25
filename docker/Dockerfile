@@ -23,6 +23,11 @@ RUN qiime dev refresh-cache
 RUN echo "source activate qiime2-${QIIME2_RELEASE}" >> $HOME/.bashrc
 RUN echo "source tab-qiime" >> $HOME/.bashrc
 
+# Important: let any UID modify these directories so that
+# `docker run -u UID:GID` works
+RUN chmod -R a+rwx /home/qiime2
+RUN chmod -R a+rwx /opt/conda
+
 # TODO: update this to point at the new homedir defined above. Keeping this
 # for now because this will require an update to the user docs.
 VOLUME ["/data"]
