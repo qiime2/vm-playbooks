@@ -26,8 +26,9 @@ Please ensure that `QIIME2_RELEASE` is a valid release, with a published environ
 $ make docker
 # After inspecting the image, login to Docker Hub:
 $ docker login quay.io
-# Then push the build up:
-$ docker push quay.io/qiime2/core
+# Then push both latest and version builds up:
+$ docker push quay.io/qiime2/core:latest
+$ docker push quay.io/qiime2/core:20XX.YY 
 # LOGOUT
 $ docker logout quay.io
 ```
