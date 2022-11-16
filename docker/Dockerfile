@@ -17,6 +17,7 @@ RUN conda install -q -y wget
 RUN apt-get install -y procps
 RUN wget https://data.qiime2.org/distro/core/qiime2-${QIIME2_RELEASE}-py38-linux-conda.yml
 RUN conda env create -n qiime2-${QIIME2_RELEASE} --file qiime2-${QIIME2_RELEASE}-py38-linux-conda.yml \
+ && conda clean -a -y \
  && chmod -R a+rwx /opt/conda
 RUN rm qiime2-${QIIME2_RELEASE}-py38-linux-conda.yml
 RUN /bin/bash -c "source activate qiime2-${QIIME2_RELEASE}"
