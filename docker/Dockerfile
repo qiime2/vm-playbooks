@@ -21,6 +21,7 @@ RUN conda env create -n qiime2-${QIIME2_RELEASE} --file qiime2-${QIIME2_RELEASE}
  && chmod -R a+rwx /opt/conda
 RUN rm qiime2-${QIIME2_RELEASE}-py38-linux-conda.yml
 RUN /bin/bash -c "source activate qiime2-${QIIME2_RELEASE}"
+ENV CONDA_PREFIX /home/qiime2/.conda/qiime2-${QIIME2_RELEASE}/
 RUN qiime dev refresh-cache
 RUN echo "source activate qiime2-${QIIME2_RELEASE}" >> $HOME/.bashrc
 RUN echo "source tab-qiime" >> $HOME/.bashrc
