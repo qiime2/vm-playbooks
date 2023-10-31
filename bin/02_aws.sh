@@ -12,7 +12,7 @@ sudo tee /etc/update-motd.d/00-header <<EOF
 if [ -z "$DISTRIB_DESCRIPTION" ] && [ -x /usr/bin/lsb_release ]; then
     DISTRIB_DESCRIPTION=$(lsb_release -s -d)
 fi
-printf "Welcome to QIIME 2 Core ${QIIME2_RELEASE}!\n\n"
+printf "Welcome to QIIME 2 Amplicon Distribution ${QIIME2_RELEASE}!\n\n"
 EOF
 
 sudo tee /etc/update-motd.d/10-help-text <<EOF
