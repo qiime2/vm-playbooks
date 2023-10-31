@@ -1,5 +1,5 @@
-QIIME2_RELEASE := 2023.7
-HOSTNAME := qiime2core2023-7
+QIIME2_RELEASE := 2023.9
+HOSTNAME := qiime2amplicon2023-9
 
 BOOTSTRAPPED_VBOX = output-virtualbox-iso/QIIME_2_BASE_IMAGE.ovf
 
@@ -14,8 +14,8 @@ help:
 .PHONY: docker
 docker:
 	docker build \
-		-t quay.io/qiime2/core:$(QIIME2_RELEASE) \
-		-t quay.io/qiime2/core:latest \
+		-t quay.io/qiime2/amplicon:$(QIIME2_RELEASE) \
+		-t quay.io/qiime2/amplicon:latest \
 		--build-arg QIIME2_RELEASE=$(QIIME2_RELEASE) docker
 
 $(BOOTSTRAPPED_VBOX):

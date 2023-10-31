@@ -18,7 +18,7 @@
       "type": "virtualbox-ovf",
       "headless": false,
       "source_path": "output-virtualbox-iso/QIIME_2_BASE_IMAGE.ovf",
-      "vm_name": "QIIME 2 Core - {{ user `QIIME2_RELEASE` }} ({{ timestamp }})",
+      "vm_name": "QIIME 2 Amplicon - {{ user `QIIME2_RELEASE` }} ({{ timestamp }})",
       "ssh_username": "ubuntu",
       "ssh_password": "ubuntu",
       "shutdown_command": "echo ubuntu | sudo -S shutdown -P now",

@@ -19,7 +19,7 @@
       "instance_type": "m1.large",
       "region": "us-west-2",
       "source_ami": "ami-0edf3b95e26a682df",
-      "ami_name": "QIIME 2 Core - {{ user `QIIME2_RELEASE` }} ({{ timestamp }})",
+      "ami_name": "QIIME 2 Amplicon - {{ user `QIIME2_RELEASE` }} ({{ timestamp }})",
       "ssh_username": "ubuntu"
     }
   ]
