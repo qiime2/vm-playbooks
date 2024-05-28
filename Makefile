@@ -1,5 +1,5 @@
-QIIME2_RELEASE := 2024.2
-HOSTNAME := qiime2amplicon2024-2
+QIIME2_RELEASE := 2024.5
+HOSTNAME := qiime2amplicon2024-5
 
 BOOTSTRAPPED_VBOX = output-virtualbox-iso/QIIME_2_BASE_IMAGE.ovf
 
