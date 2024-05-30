@@ -1,5 +1,6 @@
-QIIME2_RELEASE := 2024.2
-HOSTNAME := qiime2amplicon2024-2
+QIIME2_RELEASE := 2024.5
+DISTRIBUTION := metagenome
+HOSTNAME := qiime2metagenome2024-5
 
 BOOTSTRAPPED_VBOX = output-virtualbox-iso/QIIME_2_BASE_IMAGE.ovf
 
@@ -14,8 +15,8 @@ help:
 .PHONY: docker
 docker:
 	docker build \
-		-t quay.io/qiime2/amplicon:$(QIIME2_RELEASE) \
-		-t quay.io/qiime2/amplicon:latest \
+		-t quay.io/qiime2/$(DISTRIBUTION):$(QIIME2_RELEASE) \
+		-t quay.io/qiime2/$(DISTRIBUTION):latest \
 		--build-arg QIIME2_RELEASE=$(QIIME2_RELEASE) docker
 
 $(BOOTSTRAPPED_VBOX):

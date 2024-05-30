@@ -14,7 +14,8 @@ Edit the first two lines of `Makefile`:
 
 ```bash
 QIIME2_RELEASE := foo
-HOSTNAME := qiime2ampliconfoo
+DISTRIBUTION := bar
+HOSTNAME := qiime2barfoo
 ```
 
 Please ensure that `QIIME2_RELEASE` is a valid release, with a published environment file on https://data.qiime2.org, and that `HOSTNAME` adheres to [system requirements](https://en.wikipedia.org/wiki/Hostname#Restrictions_on_valid_hostnames).
@@ -27,8 +28,8 @@ $ make docker
 # After inspecting the image, login to Docker Hub:
 $ docker login quay.io
 # Then push both latest and version builds up:
-$ docker push quay.io/qiime2/amplicon:latest
-$ docker push quay.io/qiime2/amplicon:20XX.YY
+$ docker push quay.io/qiime2/DISTRO:latest
+$ docker push quay.io/qiime2/DISTRO:20XX.YY
 # LOGOUT
 $ docker logout quay.io
 ```
