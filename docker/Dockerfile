@@ -1,6 +1,7 @@
 FROM continuumio/miniconda3
 
 ARG QIIME2_RELEASE
+ARG DISTRIBUTION
 
 ENV PATH /opt/conda/envs/qiime2-${DISTRIBUTION}-${QIIME2_RELEASE}/bin:$PATH
 ENV LC_ALL C.UTF-8
